@@ -308,15 +308,11 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
     final colorScheme = theme.colorScheme;
 
     if (_loading) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Lead Details')),
-        body: const Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (_lead == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Lead Details')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

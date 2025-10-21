@@ -590,22 +590,6 @@ class _EMICalculatorScreenState extends State<EMICalculatorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('EMI Calculator'),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Theme.of(context).brightness == Brightness.dark
-                  ? Icons.light_mode
-                  : Icons.dark_mode,
-            ),
-            onPressed: () {
-              // Theme toggle - this is just a visual indicator for now
-              // The theme would be controlled by the main app's theme provider
-            },
-          ),
-        ],
-      ),
       body: SingleChildScrollView(
         child: Column(
           children: [

@@ -15,7 +15,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _cityController = TextEditingController();
-  
+
   bool _saving = false;
 
   @override
@@ -67,14 +67,18 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
 
   Future<void> _save() async {
     // Validate required fields
-    if (_nameController.text.trim().isEmpty || _phoneController.text.trim().isEmpty) {
+    if (_nameController.text.trim().isEmpty ||
+        _phoneController.text.trim().isEmpty) {
       _showValidationDialog('Validation', 'Name and phone are required');
       return;
     }
 
     // Validate phone number
     if (!LeadService.validatePhone(_phoneController.text)) {
-      _showValidationDialog('Validation', 'Please enter a valid phone number (10-15 digits)');
+      _showValidationDialog(
+        'Validation',
+        'Please enter a valid phone number (10-15 digits)',
+      );
       return;
     }
 
@@ -86,8 +90,8 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
       final newLead = Lead(
         name: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
-        divisionName: _cityController.text.trim().isNotEmpty 
-            ? _cityController.text.trim() 
+        divisionName: _cityController.text.trim().isNotEmpty
+            ? _cityController.text.trim()
             : null,
       );
 
@@ -96,10 +100,16 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
       if (success) {
         _showSuccessDialog();
       } else {
-        _showValidationDialog('Error', 'Failed to save lead. Please try again.');
+        _showValidationDialog(
+          'Error',
+          'Failed to save lead. Please try again.',
+        );
       }
     } catch (e) {
-      _showValidationDialog('Error', 'An unexpected error occurred. Please try again.');
+      _showValidationDialog(
+        'Error',
+        'An unexpected error occurred. Please try again.',
+      );
     } finally {
       setState(() {
         _saving = false;
@@ -110,10 +120,6 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Lead'),
-        centerTitle: true,
-      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -129,12 +135,14 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Name Field
                 Text(
                   'Name',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.7),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -159,7 +167,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                 Text(
                   'Phone',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.7),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -192,7 +202,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                 Text(
                   'City / Division',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.7),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -220,7 +232,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      disabledBackgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                      disabledBackgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.7),
                     ),
                     child: _saving
                         ? Row(
@@ -239,17 +253,13 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                               const SizedBox(width: 12),
                               const Text(
                                 'Saving...',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.w700),
                               ),
                             ],
                           )
                         : const Text(
                             'Save',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: TextStyle(fontWeight: FontWeight.w700),
                           ),
                   ),
                 ),

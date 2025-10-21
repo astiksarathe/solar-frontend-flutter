@@ -112,28 +112,41 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final filteredOrders = _filteredOrders;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Solar Orders'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.of(context)
-                  .push(
-                    MaterialPageRoute(
-                      builder: (context) => const UserRoleSelector(),
-                    ),
-                  )
-                  .then((_) => _loadOrders()); // Refresh when returning
-            },
-            tooltip: 'Change Role',
-          ),
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadOrders),
-        ],
-      ),
       body: Column(
         children: [
+          // Header section with title and actions
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Solar Orders',
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.person),
+                  onPressed: () {
+                    Navigator.of(context)
+                        .push(
+                          MaterialPageRoute(
+                            builder: (context) => const UserRoleSelector(),
+                          ),
+                        )
+                        .then((_) => _loadOrders()); // Refresh when returning
+                  },
+                  tooltip: 'Change Role',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: _loadOrders,
+                ),
+              ],
+            ),
+          ),
           // Search and Filter
           Container(
             padding: const EdgeInsets.all(16),

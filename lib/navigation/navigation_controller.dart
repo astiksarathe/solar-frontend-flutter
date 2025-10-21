@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/emi_calculator_screen.dart';
 import '../screens/leads_screen.dart';
+import '../screens/add_lead_screen.dart';
 import '../screens/directory_screen.dart';
 import '../screens/follow_ups_screen.dart';
 import '../screens/orders_screen.dart';
@@ -20,16 +21,17 @@ class _NavigationControllerState extends State<NavigationController> {
 
   final Map<String, Widget> _screens = {
     'dashboard': const DashboardScreen(),
-    'analytics': const _ComingSoonScreen(title: 'Analytics'),
-    'emi_calculator': const EMICalculatorScreen(),
-    'solar_calculator': const _ComingSoonScreen(title: 'Solar Calculator'),
-    'bill_analysis': const _ComingSoonScreen(title: 'Bill Analysis'),
-    'add_lead':
-        const LeadsScreen(), // You can create a dedicated add lead screen
     'leads': const LeadsScreen(),
+    'add_lead': const AddLeadScreen(),
     'directory': const DirectoryScreen(),
     'follow_ups': const FollowUpsScreen(),
     'orders': const OrdersScreen(),
+    'emi_calculator': const EMICalculatorScreen(),
+    'bill_analysis': const _ComingSoonScreen(title: 'Bill Analysis'),
+    'settings': const _ComingSoonScreen(title: 'Settings'),
+    // Legacy routes for backward compatibility
+    'analytics': const _ComingSoonScreen(title: 'Analytics'),
+    'solar_calculator': const _ComingSoonScreen(title: 'Solar Calculator'),
     'payments': const _ComingSoonScreen(title: 'Payments'),
     'inventory': const _ComingSoonScreen(title: 'Inventory'),
     'installations': const _ComingSoonScreen(title: 'Installations'),
@@ -37,7 +39,6 @@ class _NavigationControllerState extends State<NavigationController> {
     'service_requests': const _ComingSoonScreen(title: 'Service Requests'),
     'sales_reports': const _ComingSoonScreen(title: 'Sales Reports'),
     'performance': const _ComingSoonScreen(title: 'Performance'),
-    'settings': const _ComingSoonScreen(title: 'Settings'),
     'help': const _ComingSoonScreen(title: 'Help & Support'),
   };
 
@@ -83,24 +84,27 @@ class _NavigationControllerState extends State<NavigationController> {
     switch (_currentRoute) {
       case 'dashboard':
         return 'Dashboard';
-      case 'analytics':
-        return 'Analytics';
-      case 'emi_calculator':
-        return 'EMI Calculator';
-      case 'solar_calculator':
-        return 'Solar Calculator';
-      case 'bill_analysis':
-        return 'Bill Analysis';
-      case 'add_lead':
-        return 'Add Lead';
       case 'leads':
         return 'Leads';
+      case 'add_lead':
+        return 'Add Lead';
       case 'directory':
         return 'Directory';
       case 'follow_ups':
         return 'Follow-ups';
       case 'orders':
         return 'Orders';
+      case 'emi_calculator':
+        return 'EMI Calculator';
+      case 'bill_analysis':
+        return 'Bill Analysis';
+      case 'settings':
+        return 'Settings';
+      // Legacy routes
+      case 'analytics':
+        return 'Analytics';
+      case 'solar_calculator':
+        return 'Solar Calculator';
       case 'payments':
         return 'Payments';
       case 'inventory':
@@ -115,8 +119,6 @@ class _NavigationControllerState extends State<NavigationController> {
         return 'Sales Reports';
       case 'performance':
         return 'Performance';
-      case 'settings':
-        return 'Settings';
       case 'help':
         return 'Help & Support';
       default:
@@ -230,16 +232,28 @@ class _NavigationControllerState extends State<NavigationController> {
 
   Widget? _buildFloatingActionButton() {
     switch (_currentRoute) {
-      case 'leads':
+      case 'dashboard':
         return FloatingActionButton(
           onPressed: () => _navigateToRoute('add_lead'),
           tooltip: 'Add Lead',
           child: const Icon(Icons.add),
         );
+      case 'leads':
+        return FloatingActionButton(
+          onPressed: () => _navigateToRoute('add_lead'),
+          tooltip: 'Add Lead',
+          child: const Icon(Icons.person_add),
+        );
+      case 'directory':
+        return FloatingActionButton(
+          onPressed: () => _navigateToRoute('add_lead'),
+          tooltip: 'Add Contact',
+          child: const Icon(Icons.add),
+        );
       case 'orders':
         return FloatingActionButton(
           onPressed: () {
-            // Handle add order
+            // Handle add order - could navigate to a form or show dialog
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Add Order feature coming soon')),
             );

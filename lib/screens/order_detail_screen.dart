@@ -101,15 +101,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     final colorScheme = theme.colorScheme;
 
     if (_loading) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Order Details')),
-        body: const Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (_order == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Order Details')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -131,17 +127,31 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     final statusColor = _getStatusColor(_order!.status);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_order!.orderId),
-        actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadOrder),
-        ],
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header section with title and refresh
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _order!.orderId,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: _loadOrder,
+                  ),
+                ],
+              ),
+            ),
             // Header Card
             _buildHeaderCard(statusColor, theme),
 

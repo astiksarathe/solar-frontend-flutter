@@ -211,7 +211,6 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
     final followUpData = _getDataForTab();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Follow-ups'), centerTitle: true),
       body: Column(
         children: [
           // Search Bar

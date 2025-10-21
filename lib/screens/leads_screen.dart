@@ -84,7 +84,6 @@ class _LeadsScreenState extends State<LeadsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Leads'), centerTitle: true),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _leads.isEmpty

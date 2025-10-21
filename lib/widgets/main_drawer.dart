@@ -28,14 +28,26 @@ class MainDrawer extends StatelessWidget {
   static const List<MenuItem> menuItems = [
     MenuItem(
       id: 'dashboard',
-      title: 'Home',
+      title: 'Dashboard',
       icon: Icons.dashboard,
       route: 'dashboard',
     ),
     MenuItem(
+      id: 'leads',
+      title: 'Leads',
+      icon: Icons.people_outline,
+      route: 'leads',
+    ),
+    MenuItem(
+      id: 'addLead',
+      title: 'Add Lead',
+      icon: Icons.person_add,
+      route: 'add_lead',
+    ),
+    MenuItem(
       id: 'directory',
       title: 'Directory',
-      icon: Icons.people,
+      icon: Icons.folder_open,
       route: 'directory',
     ),
     MenuItem(
@@ -45,10 +57,10 @@ class MainDrawer extends StatelessWidget {
       route: 'follow_ups',
     ),
     MenuItem(
-      id: 'addLead',
-      title: 'Add Lead',
-      icon: Icons.person_add,
-      route: 'add_lead',
+      id: 'orders',
+      title: 'Orders',
+      icon: Icons.shopping_cart_outlined,
+      route: 'orders',
     ),
     MenuItem(
       id: 'emiCalculator',
@@ -57,10 +69,10 @@ class MainDrawer extends StatelessWidget {
       route: 'emi_calculator',
     ),
     MenuItem(
-      id: 'reports',
-      title: 'Reports',
-      icon: Icons.bar_chart,
-      route: 'sales_reports',
+      id: 'billAnalysis',
+      title: 'Bill Analysis',
+      icon: Icons.receipt_long,
+      route: 'bill_analysis',
     ),
     MenuItem(
       id: 'settings',
