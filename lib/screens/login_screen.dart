@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       // Simulate login delay
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // Save login state
       await AuthService.login(_emailController.text.trim());
 
@@ -47,9 +47,9 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
       }
     } finally {
       if (mounted) {

@@ -12,10 +12,9 @@ import 'package:solar_phoenix/main.dart';
 void main() {
   testWidgets('App launches smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const SolarPhoenixApp());
+    await tester.pumpWidget(const MyApp());
 
-    // Verify that our app launches with login screen
-    expect(find.text('Welcome Back'), findsOneWidget);
-    expect(find.text('Sign In'), findsOneWidget);
+    // Verify that our app launches with splash screen
+    expect(find.text('Solar-Stack'), findsOneWidget);
   });
 }

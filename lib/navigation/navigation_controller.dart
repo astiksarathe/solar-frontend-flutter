@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../screens/login_screen.dart';
 import '../screens/dashboard_screen.dart';
+import '../screens/home_screen.dart';
 import '../screens/leads_screen.dart';
 import '../screens/add_lead_screen.dart';
 import '../screens/directory_screen.dart';
@@ -39,7 +39,7 @@ class _NavigationControllerState extends State<NavigationController> {
       'follow_ups': const FollowUpsScreen(),
       'orders': const OrdersScreen(),
       'emi_calculator': const EMICalculatorScreen(),
-      'customer_lookup': const DashboardScreen(),
+      'customer_lookup': const HomeScreen(),
       'settings': const DashboardScreen(),
       // Legacy routes for backward compatibility
       'analytics': const _ComingSoonScreen(title: 'Analytics'),
@@ -141,7 +141,7 @@ class _NavigationControllerState extends State<NavigationController> {
       case 'emi_calculator':
         return 'EMI Calculator';
       case 'customer_lookup':
-        return 'Customer Lookup';
+        return 'Bill Lookup';
       case 'settings':
         return 'Settings';
       // Legacy routes
