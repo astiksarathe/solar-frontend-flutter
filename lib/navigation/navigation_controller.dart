@@ -161,91 +161,128 @@ class _NavigationControllerState extends State<NavigationController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_getAppBarTitle()),
-        centerTitle: false,
-        elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
-        actions: [
-          // Notifications
-          IconButton(
-            onPressed: () {
-              // Handle notifications
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('No new notifications')),
-              );
-            },
-            icon: Stack(
-              children: [
-                const Icon(Icons.notifications_outlined),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.error,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+
+        // If not on dashboard, navigate to dashboard instead of closing app
+        if (_currentRoute != 'dashboard') {
+          setState(() {
+            _currentRoute = 'dashboard';
+            _currentScreen = _screens['dashboard']!;
+          });
+        } else {
+          // If on dashboard, show exit confirmation
+          final shouldExit = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Exit App'),
+              content: const Text('Are you sure you want to exit?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Exit'),
                 ),
               ],
             ),
-            tooltip: 'Notifications',
-          ),
+          );
 
-          // Profile menu
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'profile':
-                  _navigateToRoute('settings', fromDrawer: false);
-                  break;
-                case 'logout':
-                  _handleLogout();
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'profile',
-                child: ListTile(
-                  leading: Icon(Icons.person),
-                  title: Text('Profile'),
-                  contentPadding: EdgeInsets.zero,
-                ),
+          if (shouldExit == true) {
+            Navigator.of(context).pop();
+          }
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_getAppBarTitle()),
+          centerTitle: false,
+          elevation: 0,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          foregroundColor: Theme.of(context).colorScheme.onSurface,
+          actions: [
+            // Notifications
+            IconButton(
+              onPressed: () {
+                // Handle notifications
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('No new notifications')),
+                );
+              },
+              icon: Stack(
+                children: [
+                  const Icon(Icons.notifications_outlined),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.error,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: ListTile(
-                  leading: Icon(Icons.logout),
-                  title: Text('Logout'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ],
-            child: const CircleAvatar(
-              radius: 16,
-              child: Icon(Icons.person, size: 18),
+              tooltip: 'Notifications',
             ),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      drawer: MainDrawer(
-        onItemTap: _navigateToRoute,
-        currentRoute: _currentRoute,
-      ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        child: _currentScreen,
-      ),
 
-      // Floating Action Button for quick actions
-      floatingActionButton: _buildFloatingActionButton(),
+            // Profile menu
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                switch (value) {
+                  case 'profile':
+                    _navigateToRoute('settings', fromDrawer: false);
+                    break;
+                  case 'logout':
+                    _handleLogout();
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'profile',
+                  child: ListTile(
+                    leading: Icon(Icons.person),
+                    title: Text('Profile'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'logout',
+                  child: ListTile(
+                    leading: Icon(Icons.logout),
+                    title: Text('Logout'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
+              child: const CircleAvatar(
+                radius: 16,
+                child: Icon(Icons.person, size: 18),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+        ),
+        drawer: MainDrawer(
+          onItemTap: _navigateToRoute,
+          currentRoute: _currentRoute,
+        ),
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: _currentScreen,
+        ),
+
+        // Floating Action Button for quick actions
+        floatingActionButton: _buildFloatingActionButton(),
+      ),
     );
   }
 
