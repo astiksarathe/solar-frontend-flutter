@@ -46,6 +46,9 @@ dependencies:
   
   # For progress indicators
   percent_indicator: ^4.2.3
+  
+  # For storing user login state
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

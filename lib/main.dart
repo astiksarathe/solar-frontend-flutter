@@ -1,45 +1,23 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
-import 'navigation/navigation_controller.dart';
+import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
-  runApp(const SolarPhoenixApp());
+  runApp(const MyApp());
 }
 
-class SolarPhoenixApp extends StatefulWidget {
-  const SolarPhoenixApp({super.key});
-
-  @override
-  State<SolarPhoenixApp> createState() => _SolarPhoenixAppState();
-}
-
-class _SolarPhoenixAppState extends State<SolarPhoenixApp> {
-  bool _isDarkMode = false;
-
-  void _toggleTheme() {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
-  }
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ThemeProvider(
-      isDarkMode: _isDarkMode,
-      toggleTheme: _toggleTheme,
-      child: MaterialApp(
-        title: 'Solar Phoenix',
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
-        home: const LoginScreen(),
-        routes: {
-          '/login': (context) => const LoginScreen(),
-          '/main': (context) => const NavigationController(),
-        },
-        debugShowCheckedModeBanner: false,
-      ),
+    return MaterialApp(
+      title: 'Solar Phoenix',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
+      home: const SplashScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

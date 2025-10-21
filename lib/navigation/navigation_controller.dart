@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../screens/login_screen.dart';
 import '../screens/dashboard_screen.dart';
-import '../screens/emi_calculator_screen.dart';
 import '../screens/leads_screen.dart';
 import '../screens/add_lead_screen.dart';
 import '../screens/directory_screen.dart';
 import '../screens/follow_ups_screen.dart';
 import '../screens/orders_screen.dart';
-import '../screens/settings_screen.dart';
-import '../screens/home_screen.dart';
+import '../screens/emi_calculator_screen.dart';
 import '../widgets/main_drawer.dart';
+import '../services/auth_service.dart';
 
 class NavigationController extends StatefulWidget {
   const NavigationController({super.key});
@@ -38,8 +39,8 @@ class _NavigationControllerState extends State<NavigationController> {
       'follow_ups': const FollowUpsScreen(),
       'orders': const OrdersScreen(),
       'emi_calculator': const EMICalculatorScreen(),
-      'customer_lookup': const HomeScreen(),
-      'settings': const SettingsScreen(),
+      'customer_lookup': const DashboardScreen(),
+      'settings': const DashboardScreen(),
       // Legacy routes for backward compatibility
       'analytics': const _ComingSoonScreen(title: 'Analytics'),
       'solar_calculator': const _ComingSoonScreen(title: 'Solar Calculator'),
@@ -101,9 +102,19 @@ class _NavigationControllerState extends State<NavigationController> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              Navigator.of(context).pushReplacementNamed('/login');
+
+              // Clear auth state
+              await AuthService.logout();
+
+              // Navigate to login screen
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (route) => false,
+                );
+              }
             },
             child: const Text('Logout'),
           ),
