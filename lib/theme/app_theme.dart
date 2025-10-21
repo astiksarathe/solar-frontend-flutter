@@ -31,13 +31,16 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.light,
     colorScheme: const ColorScheme.light(
-      background: AppColors.lightBackground,
       surface: AppColors.lightSurface,
+      onSurface: AppColors.lightText,
       primary: AppColors.lightPrimary,
       onPrimary: Colors.white,
-      onSurface: AppColors.lightText,
-      onBackground: AppColors.lightText,
+      secondary: AppColors.lightPrimary,
+      onSecondary: Colors.white,
+      outline: AppColors.lightBorder,
+      shadow: AppColors.lightShadow,
     ),
+    scaffoldBackgroundColor: AppColors.lightBackground,
     appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.lightSurface,
       foregroundColor: AppColors.lightText,
@@ -48,6 +51,9 @@ class AppTheme {
       color: AppColors.lightSurface,
       elevation: 2,
       shadowColor: AppColors.lightShadow,
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: AppColors.lightBackground,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -71,13 +77,16 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: const ColorScheme.dark(
-      background: AppColors.darkBackground,
       surface: AppColors.darkSurface,
+      onSurface: AppColors.darkText,
       primary: AppColors.darkPrimary,
       onPrimary: Colors.black,
-      onSurface: AppColors.darkText,
-      onBackground: AppColors.darkText,
+      secondary: AppColors.darkPrimary,
+      onSecondary: Colors.black,
+      outline: AppColors.darkBorder,
+      shadow: AppColors.darkShadow,
     ),
+    scaffoldBackgroundColor: AppColors.darkBackground,
     appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.darkSurface,
       foregroundColor: AppColors.darkText,
@@ -88,6 +97,9 @@ class AppTheme {
       color: AppColors.darkSurface,
       elevation: 2,
       shadowColor: AppColors.darkShadow,
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: AppColors.darkBackground,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,

@@ -25,45 +25,21 @@ class _SolarPhoenixAppState extends State<SolarPhoenixApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Solar Phoenix',
-      theme: _isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
-      home: ThemeProvider(
-        isDarkMode: _isDarkMode,
-        toggleTheme: _toggleTheme,
-        child: const LoginScreen(),
-      ),
-      routes: {
-        '/login': (context) => const LoginScreen(),
-        '/main': (context) => const MyApp(),
-      },
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  bool _isDarkMode = false;
-
-  void _toggleTheme() {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return ThemeProvider(
       isDarkMode: _isDarkMode,
       toggleTheme: _toggleTheme,
-      child: const NavigationController(),
+      child: MaterialApp(
+        title: 'Solar Phoenix',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
+        home: const LoginScreen(),
+        routes: {
+          '/login': (context) => const LoginScreen(),
+          '/main': (context) => const NavigationController(),
+        },
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }

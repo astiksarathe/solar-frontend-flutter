@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../main.dart';
+import '../navigation/navigation_controller.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -41,9 +41,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Navigate to main app
     if (mounted) {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (context) => const MyApp()));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const NavigationController()),
+      );
     }
   }
 
