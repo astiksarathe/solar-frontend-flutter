@@ -3,6 +3,7 @@ import 'screens/home_screen.dart';
 import 'screens/emi_calculator_screen.dart';
 import 'screens/leads_screen.dart';
 import 'screens/directory_screen.dart';
+import 'screens/follow_ups_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -76,6 +77,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const EMICalculatorScreen(),
     const LeadsScreen(),
     const DirectoryScreen(),
+    const FollowUpsScreen(),
   ];
 
   @override
@@ -102,6 +104,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           ),
           BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Leads'),
           BottomNavigationBarItem(icon: Icon(Icons.folder), label: 'Directory'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.schedule),
+            label: 'Follow-ups',
+          ),
         ],
       ),
     );
