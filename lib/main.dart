@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/emi_calculator_screen.dart';
 import 'screens/leads_screen.dart';
+import 'screens/directory_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -69,11 +70,12 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
-  
+
   final List<Widget> _screens = [
     const HomeScreen(),
     const EMICalculatorScreen(),
     const LeadsScreen(),
+    const DirectoryScreen(),
   ];
 
   @override
@@ -89,20 +91,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         },
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+        unselectedItemColor: Theme.of(
+          context,
+        ).colorScheme.onSurface.withOpacity(0.6),
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Dashboard',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Dashboard'),
           BottomNavigationBarItem(
             icon: Icon(Icons.calculate),
             label: 'EMI Calculator',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Leads',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Leads'),
+          BottomNavigationBarItem(icon: Icon(Icons.folder), label: 'Directory'),
         ],
       ),
     );

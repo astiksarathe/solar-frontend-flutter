@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/lead_models.dart';
 import '../services/lead_service.dart';
 import 'add_lead_screen.dart';
+import 'lead_detail_screen.dart';
 
 class LeadsScreen extends StatefulWidget {
   const LeadsScreen({super.key});
@@ -24,7 +25,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
     setState(() {
       _loading = true;
     });
-    
+
     // Simulate loading delay
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {
@@ -39,7 +40,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
       context,
       MaterialPageRoute(builder: (context) => const AddLeadScreen()),
     );
-    
+
     // Refresh the list when returning from add screen
     if (result == true || mounted) {
       _loadLeads();
@@ -83,15 +84,12 @@ class _LeadsScreenState extends State<LeadsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Leads'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Leads'), centerTitle: true),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _leads.isEmpty
-              ? _buildEmptyState()
-              : _buildLeadsList(),
+          ? _buildEmptyState()
+          : _buildLeadsList(),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddLead,
         child: const Icon(Icons.add),
@@ -161,11 +159,13 @@ class _LeadsScreenState extends State<LeadsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(LeadService.formatPhone(lead.phone)),
-                if (lead.divisionName != null) 
+                if (lead.divisionName != null)
                   Text(
                     lead.divisionName!,
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
               ],
@@ -205,10 +205,19 @@ class _LeadsScreenState extends State<LeadsScreen> {
               },
             ),
             onTap: () {
-              // TODO: Navigate to lead details
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Tapped on ${lead.name}')),
-              );
+              if (lead.id != null) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => LeadDetailScreen(leadId: lead.id!),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Lead ID not available for ${lead.name}'),
+                  ),
+                );
+              }
             },
           ),
         );
