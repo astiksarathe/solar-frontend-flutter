@@ -89,10 +89,6 @@ class _LeadsScreenState extends State<LeadsScreen> {
           : _leads.isEmpty
           ? _buildEmptyState()
           : _buildLeadsList(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddLead,
-        child: const Icon(Icons.add),
-      ),
     );
   }
 

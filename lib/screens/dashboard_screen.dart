@@ -110,54 +110,6 @@ class DashboardScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Quick Actions
-            Text(
-              'Quick Actions',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-
-            Row(
-              children: [
-                Expanded(
-                  child: _buildQuickActionCard(
-                    context,
-                    'Add New Lead',
-                    'Capture new customer',
-                    Icons.person_add,
-                    Colors.green,
-                    () {
-                      // Will be handled by navigation controller
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Navigate to Add Lead')),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildQuickActionCard(
-                    context,
-                    'EMI Calculator',
-                    'Calculate loan EMI',
-                    Icons.calculate,
-                    Colors.blue,
-                    () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Navigate to EMI Calculator'),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
             // Recent Activity
             Text(
               'Recent Activity',
@@ -178,7 +130,11 @@ class DashboardScreen extends StatelessWidget {
                     Icons.person_add,
                     Colors.green,
                   ),
-                  const Divider(),
+                  Divider(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withOpacity(0.2),
+                  ),
                   _buildActivityItem(
                     context,
                     'Order confirmed',
@@ -187,7 +143,11 @@ class DashboardScreen extends StatelessWidget {
                     Icons.check_circle,
                     Colors.blue,
                   ),
-                  const Divider(),
+                  Divider(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withOpacity(0.2),
+                  ),
                   _buildActivityItem(
                     context,
                     'Follow-up completed',
@@ -256,54 +216,6 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickActionCard(
-    BuildContext context,
-    String title,
-    String subtitle,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: color, size: 24),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withOpacity(0.6),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

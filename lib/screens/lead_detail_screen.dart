@@ -491,6 +491,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
             right: 18,
             bottom: 26,
             child: FloatingActionButton(
+              heroTag: "lead_detail_fab",
               onPressed: () {
                 setState(() {
                   _actionsOpen = true;

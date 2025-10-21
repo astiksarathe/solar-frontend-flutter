@@ -15,14 +15,19 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _cityController = TextEditingController();
+  final _notesController = TextEditingController();
 
   bool _saving = false;
+  DateTime? _selectedDate;
+  TimeOfDay? _selectedTime;
+  String? _selectedReminderType;
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
     _cityController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -65,6 +70,45 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
     );
   }
 
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  Future<void> _selectTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime ?? TimeOfDay.now(),
+    );
+    if (picked != null && picked != _selectedTime) {
+      setState(() {
+        _selectedTime = picked;
+      });
+    }
+  }
+
+  DateTime? _getCombinedDateTime() {
+    if (_selectedDate != null && _selectedTime != null) {
+      return DateTime(
+        _selectedDate!.year,
+        _selectedDate!.month,
+        _selectedDate!.day,
+        _selectedTime!.hour,
+        _selectedTime!.minute,
+      );
+    }
+    return null;
+  }
+
   Future<void> _save() async {
     // Validate required fields
     if (_nameController.text.trim().isEmpty ||
@@ -93,6 +137,11 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
         divisionName: _cityController.text.trim().isNotEmpty
             ? _cityController.text.trim()
             : null,
+        reminderNote: _notesController.text.trim().isNotEmpty
+            ? _notesController.text.trim()
+            : null,
+        reminderAt: _getCombinedDateTime(),
+        reminderType: _selectedReminderType,
       );
 
       final success = await LeadService.addLead(newLead);
@@ -128,14 +177,6 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Add Lead',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 24),
-
                 // Name Field
                 Text(
                   'Name',
@@ -215,8 +256,241 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                     hintText: 'City',
                     border: OutlineInputBorder(),
                   ),
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _save(),
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 16),
+
+                // Notes Field
+                Text(
+                  'Notes',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.7),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: _notesController,
+                  decoration: const InputDecoration(
+                    hintText: 'Add any notes about this lead...',
+                    border: OutlineInputBorder(),
+                  ),
+                  textInputAction: TextInputAction.newline,
+                  maxLines: 3,
+                  minLines: 1,
+                ),
+                const SizedBox(height: 24),
+
+                // Reminder Section
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withOpacity(0.3),
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Reminder',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Reminder Type
+                      Text(
+                        'Type',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.7),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        initialValue: _selectedReminderType,
+                        decoration: const InputDecoration(
+                          hintText: 'Select reminder type',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 'call', child: Text('Call')),
+                          DropdownMenuItem(
+                            value: 'meeting',
+                            child: Text('Meeting'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'follow_up',
+                            child: Text('Follow Up'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'site_visit',
+                            child: Text('Site Visit'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'other',
+                            child: Text('Other'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedReminderType = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Date and Time Row
+                      Row(
+                        children: [
+                          // Date Selection
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Date',
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withOpacity(0.7),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                ),
+                                const SizedBox(height: 8),
+                                InkWell(
+                                  onTap: _selectDate,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 16,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.outline,
+                                      ),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.calendar_today,
+                                          size: 20,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withOpacity(0.6),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            _selectedDate != null
+                                                ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                                                : 'Select date',
+                                            style: TextStyle(
+                                              color: _selectedDate != null
+                                                  ? Theme.of(
+                                                      context,
+                                                    ).colorScheme.onSurface
+                                                  : Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withOpacity(0.6),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+
+                          // Time Selection
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Time',
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withOpacity(0.7),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                ),
+                                const SizedBox(height: 8),
+                                InkWell(
+                                  onTap: _selectTime,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 16,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.outline,
+                                      ),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.access_time,
+                                          size: 20,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withOpacity(0.6),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            _selectedTime != null
+                                                ? _selectedTime!.format(context)
+                                                : 'Select time',
+                                            style: TextStyle(
+                                              color: _selectedTime != null
+                                                  ? Theme.of(
+                                                      context,
+                                                    ).colorScheme.onSurface
+                                                  : Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withOpacity(0.6),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 24),
 

@@ -204,30 +204,6 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
           SafeArea(
             child: Column(
               children: [
-                // Header
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Directory',
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${filteredLeads.length} leads',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
                 // Search Bar
                 custom.SearchBar(
                   value: _query,
@@ -256,6 +232,7 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
             right: 18,
             bottom: 26,
             child: FloatingActionButton.extended(
+              heroTag: "directory_filter_fab",
               onPressed: () {
                 setState(() {
                   _modalOpen = true;

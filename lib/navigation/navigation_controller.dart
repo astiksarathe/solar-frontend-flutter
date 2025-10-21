@@ -6,7 +6,6 @@ import '../screens/add_lead_screen.dart';
 import '../screens/directory_screen.dart';
 import '../screens/follow_ups_screen.dart';
 import '../screens/orders_screen.dart';
-import '../screens/bill_analysis_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/home_screen.dart';
 import '../widgets/main_drawer.dart';
@@ -20,31 +19,40 @@ class NavigationController extends StatefulWidget {
 
 class _NavigationControllerState extends State<NavigationController> {
   String _currentRoute = 'dashboard';
-  Widget _currentScreen = const DashboardScreen();
+  late Widget _currentScreen;
+  late Map<String, Widget> _screens;
 
-  final Map<String, Widget> _screens = {
-    'dashboard': const DashboardScreen(),
-    'leads': const LeadsScreen(),
-    'add_lead': const AddLeadScreen(),
-    'directory': const DirectoryScreen(),
-    'follow_ups': const FollowUpsScreen(),
-    'orders': const OrdersScreen(),
-    'emi_calculator': const EMICalculatorScreen(),
-    'customer_lookup': const HomeScreen(),
-    'bill_analysis': const BillAnalysisScreen(),
-    'settings': const SettingsScreen(),
-    // Legacy routes for backward compatibility
-    'analytics': const _ComingSoonScreen(title: 'Analytics'),
-    'solar_calculator': const _ComingSoonScreen(title: 'Solar Calculator'),
-    'payments': const _ComingSoonScreen(title: 'Payments'),
-    'inventory': const _ComingSoonScreen(title: 'Inventory'),
-    'installations': const _ComingSoonScreen(title: 'Installations'),
-    'maintenance': const _ComingSoonScreen(title: 'Maintenance'),
-    'service_requests': const _ComingSoonScreen(title: 'Service Requests'),
-    'sales_reports': const _ComingSoonScreen(title: 'Sales Reports'),
-    'performance': const _ComingSoonScreen(title: 'Performance'),
-    'help': const _ComingSoonScreen(title: 'Help & Support'),
-  };
+  @override
+  void initState() {
+    super.initState();
+    _initializeScreens();
+    _currentScreen = _screens['dashboard']!;
+  }
+
+  void _initializeScreens() {
+    _screens = {
+      'dashboard': const DashboardScreen(),
+      'leads': const LeadsScreen(),
+      'add_lead': const AddLeadScreen(),
+      'directory': const DirectoryScreen(),
+      'follow_ups': const FollowUpsScreen(),
+      'orders': const OrdersScreen(),
+      'emi_calculator': const EMICalculatorScreen(),
+      'customer_lookup': const HomeScreen(),
+      'settings': const SettingsScreen(),
+      // Legacy routes for backward compatibility
+      'analytics': const _ComingSoonScreen(title: 'Analytics'),
+      'solar_calculator': const _ComingSoonScreen(title: 'Solar Calculator'),
+      'payments': const _ComingSoonScreen(title: 'Payments'),
+      'inventory': const _ComingSoonScreen(title: 'Inventory'),
+      'installations': const _ComingSoonScreen(title: 'Installations'),
+      'maintenance': const _ComingSoonScreen(title: 'Maintenance'),
+      'service_requests': const _ComingSoonScreen(title: 'Service Requests'),
+      'sales_reports': const _ComingSoonScreen(title: 'Sales Reports'),
+      'performance': const _ComingSoonScreen(title: 'Performance'),
+      'help': const _ComingSoonScreen(title: 'Help & Support'),
+    };
+  }
 
   void _navigateToRoute(String route, {bool fromDrawer = true}) {
     if (route == 'logout') {
@@ -123,8 +131,6 @@ class _NavigationControllerState extends State<NavigationController> {
         return 'EMI Calculator';
       case 'customer_lookup':
         return 'Customer Lookup';
-      case 'bill_analysis':
-        return 'Bill Analysis';
       case 'settings':
         return 'Settings';
       // Legacy routes
@@ -163,38 +169,6 @@ class _NavigationControllerState extends State<NavigationController> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         actions: [
-          // Quick action buttons for frequent tasks
-          if (_currentRoute == 'dashboard') ...[
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: IconButton(
-                onPressed: () =>
-                    _navigateToRoute('add_lead', fromDrawer: false),
-                icon: const Icon(Icons.person_add),
-                tooltip: 'Add Lead',
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: IconButton(
-                onPressed: () =>
-                    _navigateToRoute('emi_calculator', fromDrawer: false),
-                icon: const Icon(Icons.calculate),
-                tooltip: 'EMI Calculator',
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-          ],
-
           // Notifications
           IconButton(
             onPressed: () {
@@ -279,24 +253,28 @@ class _NavigationControllerState extends State<NavigationController> {
     switch (_currentRoute) {
       case 'dashboard':
         return FloatingActionButton(
+          heroTag: "dashboard_fab",
           onPressed: () => _navigateToRoute('add_lead', fromDrawer: false),
           tooltip: 'Add Lead',
           child: const Icon(Icons.add),
         );
       case 'leads':
         return FloatingActionButton(
+          heroTag: "leads_fab",
           onPressed: () => _navigateToRoute('add_lead', fromDrawer: false),
           tooltip: 'Add Lead',
           child: const Icon(Icons.person_add),
         );
       case 'directory':
         return FloatingActionButton(
+          heroTag: "directory_fab",
           onPressed: () => _navigateToRoute('add_lead', fromDrawer: false),
           tooltip: 'Add Contact',
           child: const Icon(Icons.add),
         );
       case 'orders':
         return FloatingActionButton(
+          heroTag: "orders_fab",
           onPressed: () {
             // Handle add order - could navigate to a form or show dialog
             ScaffoldMessenger.of(context).showSnackBar(
@@ -308,6 +286,7 @@ class _NavigationControllerState extends State<NavigationController> {
         );
       case 'follow_ups':
         return FloatingActionButton(
+          heroTag: "follow_ups_fab",
           onPressed: () {
             // Handle add follow-up
             ScaffoldMessenger.of(context).showSnackBar(

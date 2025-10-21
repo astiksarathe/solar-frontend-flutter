@@ -75,12 +75,6 @@ class MainDrawer extends StatelessWidget {
       route: 'customer_lookup',
     ),
     MenuItem(
-      id: 'billAnalysis',
-      title: 'Bill Analysis',
-      icon: Icons.receipt_long,
-      route: 'bill_analysis',
-    ),
-    MenuItem(
       id: 'settings',
       title: 'Settings',
       icon: Icons.settings,
