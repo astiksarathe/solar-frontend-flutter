@@ -6,6 +6,9 @@ import '../screens/add_lead_screen.dart';
 import '../screens/directory_screen.dart';
 import '../screens/follow_ups_screen.dart';
 import '../screens/orders_screen.dart';
+import '../screens/bill_analysis_screen.dart';
+import '../screens/settings_screen.dart';
+import '../screens/home_screen.dart';
 import '../widgets/main_drawer.dart';
 
 class NavigationController extends StatefulWidget {
@@ -27,8 +30,9 @@ class _NavigationControllerState extends State<NavigationController> {
     'follow_ups': const FollowUpsScreen(),
     'orders': const OrdersScreen(),
     'emi_calculator': const EMICalculatorScreen(),
-    'bill_analysis': const _ComingSoonScreen(title: 'Bill Analysis'),
-    'settings': const _ComingSoonScreen(title: 'Settings'),
+    'customer_lookup': const HomeScreen(),
+    'bill_analysis': const BillAnalysisScreen(),
+    'settings': const SettingsScreen(),
     // Legacy routes for backward compatibility
     'analytics': const _ComingSoonScreen(title: 'Analytics'),
     'solar_calculator': const _ComingSoonScreen(title: 'Solar Calculator'),
@@ -42,18 +46,38 @@ class _NavigationControllerState extends State<NavigationController> {
     'help': const _ComingSoonScreen(title: 'Help & Support'),
   };
 
-  void _navigateToRoute(String route) {
+  void _navigateToRoute(String route, {bool fromDrawer = true}) {
     if (route == 'logout') {
       _handleLogout();
       return;
     }
 
+    // Check if the screen is available
     if (_screens.containsKey(route)) {
       setState(() {
         _currentRoute = route;
         _currentScreen = _screens[route]!;
       });
-      Navigator.of(context).pop(); // Close drawer
+      if (fromDrawer) {
+        Navigator.of(
+          context,
+        ).pop(); // Close drawer only if navigation is from drawer
+      }
+    } else {
+      // Handle unavailable routes with a snackbar
+      if (fromDrawer) {
+        Navigator.of(context).pop(); // Close drawer first if from drawer
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${_getAppBarTitle(route)} is not available yet'),
+          action: SnackBarAction(
+            label: 'OK',
+            onPressed: () =>
+                ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+          ),
+        ),
+      );
     }
   }
 
@@ -80,8 +104,9 @@ class _NavigationControllerState extends State<NavigationController> {
     );
   }
 
-  String _getAppBarTitle() {
-    switch (_currentRoute) {
+  String _getAppBarTitle([String? route]) {
+    final targetRoute = route ?? _currentRoute;
+    switch (targetRoute) {
       case 'dashboard':
         return 'Dashboard';
       case 'leads':
@@ -96,6 +121,8 @@ class _NavigationControllerState extends State<NavigationController> {
         return 'Orders';
       case 'emi_calculator':
         return 'EMI Calculator';
+      case 'customer_lookup':
+        return 'Customer Lookup';
       case 'bill_analysis':
         return 'Bill Analysis';
       case 'settings':
@@ -138,15 +165,33 @@ class _NavigationControllerState extends State<NavigationController> {
         actions: [
           // Quick action buttons for frequent tasks
           if (_currentRoute == 'dashboard') ...[
-            IconButton(
-              onPressed: () => _navigateToRoute('add_lead'),
-              icon: const Icon(Icons.person_add),
-              tooltip: 'Add Lead',
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: IconButton(
+                onPressed: () =>
+                    _navigateToRoute('add_lead', fromDrawer: false),
+                icon: const Icon(Icons.person_add),
+                tooltip: 'Add Lead',
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
-            IconButton(
-              onPressed: () => _navigateToRoute('emi_calculator'),
-              icon: const Icon(Icons.calculate),
-              tooltip: 'EMI Calculator',
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: IconButton(
+                onPressed: () =>
+                    _navigateToRoute('emi_calculator', fromDrawer: false),
+                icon: const Icon(Icons.calculate),
+                tooltip: 'EMI Calculator',
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ],
 
@@ -183,7 +228,7 @@ class _NavigationControllerState extends State<NavigationController> {
             onSelected: (value) {
               switch (value) {
                 case 'profile':
-                  _navigateToRoute('settings');
+                  _navigateToRoute('settings', fromDrawer: false);
                   break;
                 case 'logout':
                   _handleLogout();
@@ -234,19 +279,19 @@ class _NavigationControllerState extends State<NavigationController> {
     switch (_currentRoute) {
       case 'dashboard':
         return FloatingActionButton(
-          onPressed: () => _navigateToRoute('add_lead'),
+          onPressed: () => _navigateToRoute('add_lead', fromDrawer: false),
           tooltip: 'Add Lead',
           child: const Icon(Icons.add),
         );
       case 'leads':
         return FloatingActionButton(
-          onPressed: () => _navigateToRoute('add_lead'),
+          onPressed: () => _navigateToRoute('add_lead', fromDrawer: false),
           tooltip: 'Add Lead',
           child: const Icon(Icons.person_add),
         );
       case 'directory':
         return FloatingActionButton(
-          onPressed: () => _navigateToRoute('add_lead'),
+          onPressed: () => _navigateToRoute('add_lead', fromDrawer: false),
           tooltip: 'Add Contact',
           child: const Icon(Icons.add),
         );

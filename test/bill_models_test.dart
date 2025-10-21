@@ -43,7 +43,10 @@ void main() {
       expect(billData.billAnalysis.totalBills, equals(6));
       expect(billData.billAnalysis.averageConsumption, equals(110.0));
       expect(billData.solarRecommendation.recommendedSystemSize, equals(5.0));
-      expect(billData.solarRecommendation.savings.monthlyBillSavings, equals(1200.0));
+      expect(
+        billData.solarRecommendation.savings.monthlyBillSavings,
+        equals(1200.0),
+      );
     });
 
     test('ApiResponse should handle success and failure', () {
@@ -77,7 +80,7 @@ void main() {
               'paybackPeriod': 0,
             },
           },
-        }
+        },
       };
 
       final successResponse = ApiResponse.fromJson(successJson);
@@ -86,10 +89,7 @@ void main() {
       expect(successResponse.data!.consumerDetails.name, equals('Test User'));
 
       // Test failure response
-      final failureJson = {
-        'success': false,
-        'message': 'Consumer not found',
-      };
+      final failureJson = {'success': false, 'message': 'Consumer not found'};
 
       final failureResponse = ApiResponse.fromJson(failureJson);
       expect(failureResponse.success, isFalse);

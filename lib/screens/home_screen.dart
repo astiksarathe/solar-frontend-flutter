@@ -22,6 +22,17 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _error;
 
   @override
+  void initState() {
+    super.initState();
+    // Add listener to update button state when text changes
+    _consumerNumberController.addListener(() {
+      setState(() {
+        // This will trigger a rebuild when text changes
+      });
+    });
+  }
+
+  @override
   void dispose() {
     _consumerNumberController.dispose();
     super.dispose();
@@ -73,28 +84,46 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: _consumerNumberController,
-              decoration: const InputDecoration(
-                hintText: 'Consumer number',
-                border: OutlineInputBorder(),
+              keyboardType: TextInputType.text,
+              textCapitalization: TextCapitalization.characters,
+              decoration: InputDecoration(
+                hintText: 'Enter consumer number (e.g., CON123456)',
+                prefixIcon: const Icon(Icons.search),
+                border: const OutlineInputBorder(),
+                suffixIcon: _consumerNumberController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _consumerNumberController.clear();
+                          setState(() {
+                            _error = null;
+                            _hasFetchedData = false;
+                            _billDetails = null;
+                          });
+                        },
+                      )
+                    : null,
               ),
             ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: ElevatedButton.icon(
                 onPressed:
                     _loading || _consumerNumberController.text.trim().isEmpty
                     ? null
                     : _fetchBillDetails,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.lightSuccess,
+                  backgroundColor: _consumerNumberController.text.trim().isEmpty
+                      ? Colors.grey
+                      : AppColors.lightSuccess,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: _loading
+                icon: _loading
                     ? const SizedBox(
                         height: 20,
                         width: 20,
@@ -105,13 +134,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       )
-                    : const Text(
-                        'Fetch Bill Details',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                    : const Icon(Icons.search),
+                label: Text(
+                  _loading ? 'Fetching...' : 'Fetch Bill Details',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
             if (_error != null) ...[
@@ -562,7 +592,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Solar Phoenix'), centerTitle: true),
       body: Stack(
         children: [
           SingleChildScrollView(

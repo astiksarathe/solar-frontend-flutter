@@ -69,6 +69,12 @@ class MainDrawer extends StatelessWidget {
       route: 'emi_calculator',
     ),
     MenuItem(
+      id: 'customerLookup',
+      title: 'Customer Lookup',
+      icon: Icons.search,
+      route: 'customer_lookup',
+    ),
+    MenuItem(
       id: 'billAnalysis',
       title: 'Bill Analysis',
       icon: Icons.receipt_long,
@@ -104,35 +110,32 @@ class MainDrawer extends StatelessWidget {
           color: isDarkMode ? theme.colorScheme.surface : null,
         ),
 
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  children: [
-                    // Header Section
-                    _buildHeader(context, isDarkMode),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            children: [
+              // Header Section
+              _buildHeader(context, isDarkMode),
 
-                    // Profile Section
-                    _buildProfileSection(context, theme),
+              // Profile Section
+              _buildProfileSection(context, theme),
 
-                    // Divider
-                    _buildDivider(context, theme),
+              // Divider
+              _buildDivider(context, theme),
 
-                    // Menu Items
-                    _buildMenuCard(context, theme),
+              // Menu Items
+              _buildMenuCard(context, theme),
 
-                    // Bottom Divider
-                    _buildDivider(context, theme),
-                  ],
-                ),
-              ),
-            ),
+              // Bottom Divider
+              _buildDivider(context, theme),
 
-            // Bottom Section
-            _buildBottomSection(context, theme, themeProvider),
-          ],
+              // Bottom Section (now scrollable)
+              _buildBottomSection(context, theme, themeProvider),
+
+              // Add some bottom padding for better UX
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -265,6 +268,20 @@ class MainDrawer extends StatelessWidget {
   ) {
     final isSelected = currentRoute == item.route;
 
+    // Check if this is a fully implemented feature
+    final isFullyImplemented = [
+      'dashboard',
+      'leads',
+      'add_lead',
+      'directory',
+      'follow_ups',
+      'orders',
+      'emi_calculator',
+      'customer_lookup',
+      'bill_analysis',
+      'settings',
+    ].contains(item.route);
+
     return InkWell(
       onTap: () => onItemTap(item.route),
       borderRadius: BorderRadius.circular(8),
@@ -301,6 +318,29 @@ class MainDrawer extends StatelessWidget {
                 ),
               ),
             ),
+            // Status indicator
+            if (!isFullyImplemented)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.secondary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Soon',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.secondary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              )
+            else if (isSelected)
+              Icon(
+                Icons.chevron_right,
+                size: 16,
+                color: theme.colorScheme.primary,
+              ),
           ],
         ),
       ),
@@ -312,57 +352,39 @@ class MainDrawer extends StatelessWidget {
     ThemeData theme,
     ThemeProvider? themeProvider,
   ) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Feature Coming Soon Card
-            _buildBottomCard(
-              context,
-              theme,
-              icon: Icons.lightbulb_outline,
-              title: 'Feature coming soon',
-              trailing: Icon(
-                Icons.info_outline,
-                size: 18,
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
-              ),
-              onTap: () {},
-            ),
-
-            const SizedBox(height: 8),
-
-            // Dark Mode Toggle Card
-            _buildBottomCard(
-              context,
-              theme,
-              icon: Icons.dark_mode_outlined,
-              title: 'Dark Mode',
-              trailing: Switch(
-                value: theme.brightness == Brightness.dark,
-                onChanged: (value) {
-                  themeProvider?.toggleTheme();
-                },
-                activeThumbColor: theme.colorScheme.primary,
-              ),
-              onTap: () {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          // Dark Mode Toggle Card
+          _buildBottomCard(
+            context,
+            theme,
+            icon: Icons.dark_mode_outlined,
+            title: 'Dark Mode',
+            trailing: Switch(
+              value: theme.brightness == Brightness.dark,
+              onChanged: (value) {
                 themeProvider?.toggleTheme();
               },
+              activeThumbColor: theme.colorScheme.primary,
             ),
+            onTap: () {
+              themeProvider?.toggleTheme();
+            },
+          ),
 
-            const SizedBox(height: 8),
+          const SizedBox(height: 8),
 
-            // Logout Card
-            _buildBottomCard(
-              context,
-              theme,
-              icon: Icons.logout,
-              title: 'Logout',
-              onTap: () => onItemTap('logout'),
-            ),
-          ],
-        ),
+          // Logout Card
+          _buildBottomCard(
+            context,
+            theme,
+            icon: Icons.logout,
+            title: 'Logout',
+            onTap: () => onItemTap('logout'),
+          ),
+        ],
       ),
     );
   }

@@ -28,10 +28,7 @@ class MonthlyData {
   final String billMonth;
   final String consumption;
 
-  MonthlyData({
-    required this.billMonth,
-    required this.consumption,
-  });
+  MonthlyData({required this.billMonth, required this.consumption});
 
   factory MonthlyData.fromJson(Map<String, dynamic> json) {
     return MonthlyData(
@@ -61,7 +58,8 @@ class BillAnalysis {
   factory BillAnalysis.fromJson(Map<String, dynamic> json) {
     return BillAnalysis(
       totalBills: json['totalBills'] ?? 0,
-      last6MonthsData: (json['last6MonthsData'] as List<dynamic>?)
+      last6MonthsData:
+          (json['last6MonthsData'] as List<dynamic>?)
               ?.map((item) => MonthlyData.fromJson(item))
               .toList() ??
           [],
@@ -134,7 +132,9 @@ class BillData {
     return BillData(
       consumerDetails: ConsumerDetails.fromJson(json['consumerDetails'] ?? {}),
       billAnalysis: BillAnalysis.fromJson(json['billAnalysis'] ?? {}),
-      solarRecommendation: SolarRecommendation.fromJson(json['solarRecommendation'] ?? {}),
+      solarRecommendation: SolarRecommendation.fromJson(
+        json['solarRecommendation'] ?? {},
+      ),
     );
   }
 }
@@ -144,11 +144,7 @@ class ApiResponse {
   final BillData? data;
   final String? message;
 
-  ApiResponse({
-    required this.success,
-    this.data,
-    this.message,
-  });
+  ApiResponse({required this.success, this.data, this.message});
 
   factory ApiResponse.fromJson(Map<String, dynamic> json) {
     return ApiResponse(
