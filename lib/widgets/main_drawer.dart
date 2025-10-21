@@ -26,13 +26,48 @@ class MainDrawer extends StatelessWidget {
   });
 
   static const List<MenuItem> menuItems = [
-    MenuItem(id: 'dashboard', title: 'Home', icon: Icons.dashboard, route: 'dashboard'),
-    MenuItem(id: 'directory', title: 'Directory', icon: Icons.people, route: 'directory'),
-    MenuItem(id: 'followups', title: 'Follow-ups', icon: Icons.schedule, route: 'follow_ups'),
-    MenuItem(id: 'addLead', title: 'Add Lead', icon: Icons.person_add, route: 'add_lead'),
-    MenuItem(id: 'emiCalculator', title: 'EMI Calculator', icon: Icons.calculate, route: 'emi_calculator'),
-    MenuItem(id: 'reports', title: 'Reports', icon: Icons.bar_chart, route: 'sales_reports'),
-    MenuItem(id: 'settings', title: 'Settings', icon: Icons.settings, route: 'settings'),
+    MenuItem(
+      id: 'dashboard',
+      title: 'Home',
+      icon: Icons.dashboard,
+      route: 'dashboard',
+    ),
+    MenuItem(
+      id: 'directory',
+      title: 'Directory',
+      icon: Icons.people,
+      route: 'directory',
+    ),
+    MenuItem(
+      id: 'followups',
+      title: 'Follow-ups',
+      icon: Icons.schedule,
+      route: 'follow_ups',
+    ),
+    MenuItem(
+      id: 'addLead',
+      title: 'Add Lead',
+      icon: Icons.person_add,
+      route: 'add_lead',
+    ),
+    MenuItem(
+      id: 'emiCalculator',
+      title: 'EMI Calculator',
+      icon: Icons.calculate,
+      route: 'emi_calculator',
+    ),
+    MenuItem(
+      id: 'reports',
+      title: 'Reports',
+      icon: Icons.bar_chart,
+      route: 'sales_reports',
+    ),
+    MenuItem(
+      id: 'settings',
+      title: 'Settings',
+      icon: Icons.settings,
+      route: 'settings',
+    ),
   ];
 
   @override
@@ -66,23 +101,23 @@ class MainDrawer extends StatelessWidget {
                   children: [
                     // Header Section
                     _buildHeader(context, isDarkMode),
-                    
+
                     // Profile Section
                     _buildProfileSection(context, theme),
-                    
+
                     // Divider
                     _buildDivider(context, theme),
-                    
+
                     // Menu Items
                     _buildMenuCard(context, theme),
-                    
+
                     // Bottom Divider
                     _buildDivider(context, theme),
                   ],
                 ),
               ),
             ),
-            
+
             // Bottom Section
             _buildBottomSection(context, theme, themeProvider),
           ],
@@ -113,10 +148,7 @@ class MainDrawer extends StatelessWidget {
           ),
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: Icon(
-              Icons.close,
-              color: theme.colorScheme.onSurface,
-            ),
+            icon: Icon(Icons.close, color: theme.colorScheme.onSurface),
           ),
         ],
       ),
@@ -206,16 +238,21 @@ class MainDrawer extends StatelessWidget {
           final index = entry.key;
           final item = entry.value;
           final isLast = index == menuItems.length - 1;
-          
+
           return _buildMenuItem(context, theme, item, !isLast);
         }).toList(),
       ),
     );
   }
 
-  Widget _buildMenuItem(BuildContext context, ThemeData theme, MenuItem item, bool showDivider) {
+  Widget _buildMenuItem(
+    BuildContext context,
+    ThemeData theme,
+    MenuItem item,
+    bool showDivider,
+  ) {
     final isSelected = currentRoute == item.route;
-    
+
     return InkWell(
       onTap: () => onItemTap(item.route),
       borderRadius: BorderRadius.circular(8),
@@ -236,8 +273,8 @@ class MainDrawer extends StatelessWidget {
             Icon(
               item.icon,
               size: 20,
-              color: isSelected 
-                  ? theme.colorScheme.primary 
+              color: isSelected
+                  ? theme.colorScheme.primary
                   : theme.colorScheme.onSurface.withOpacity(0.7),
             ),
             const SizedBox(width: 16),
@@ -245,8 +282,8 @@ class MainDrawer extends StatelessWidget {
               child: Text(
                 item.title,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: isSelected 
-                      ? theme.colorScheme.primary 
+                  color: isSelected
+                      ? theme.colorScheme.primary
                       : theme.colorScheme.onSurface,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
@@ -258,7 +295,11 @@ class MainDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomSection(BuildContext context, ThemeData theme, ThemeProvider? themeProvider) {
+  Widget _buildBottomSection(
+    BuildContext context,
+    ThemeData theme,
+    ThemeProvider? themeProvider,
+  ) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -277,9 +318,9 @@ class MainDrawer extends StatelessWidget {
               ),
               onTap: () {},
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             // Dark Mode Toggle Card
             _buildBottomCard(
               context,
@@ -291,15 +332,15 @@ class MainDrawer extends StatelessWidget {
                 onChanged: (value) {
                   themeProvider?.toggleTheme();
                 },
-                activeColor: theme.colorScheme.primary,
+                activeThumbColor: theme.colorScheme.primary,
               ),
               onTap: () {
                 themeProvider?.toggleTheme();
               },
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             // Logout Card
             _buildBottomCard(
               context,
