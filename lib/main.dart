@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'screens/home_screen.dart';
 import 'screens/emi_calculator_screen.dart';
+import 'screens/leads_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -25,12 +27,12 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Solar Phoenix EMI Calculator',
+      title: 'Solar Phoenix',
       theme: _isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
       home: ThemeProvider(
         isDarkMode: _isDarkMode,
         toggleTheme: _toggleTheme,
-        child: const EMICalculatorScreen(),
+        child: const MainNavigationScreen(),
       ),
       debugShowCheckedModeBanner: false,
     );
@@ -55,5 +57,54 @@ class ThemeProvider extends InheritedWidget {
   @override
   bool updateShouldNotify(ThemeProvider oldWidget) {
     return isDarkMode != oldWidget.isDarkMode;
+  }
+}
+
+class MainNavigationScreen extends StatefulWidget {
+  const MainNavigationScreen({super.key});
+
+  @override
+  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+}
+
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
+  int _currentIndex = 0;
+  
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const EMICalculatorScreen(),
+    const LeadsScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Dashboard',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calculate),
+            label: 'EMI Calculator',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'Leads',
+          ),
+        ],
+      ),
+    );
   }
 }
