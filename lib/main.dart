@@ -4,10 +4,43 @@ import 'screens/emi_calculator_screen.dart';
 import 'screens/leads_screen.dart';
 import 'screens/directory_screen.dart';
 import 'screens/follow_ups_screen.dart';
+import 'screens/orders_screen.dart';
+import 'screens/login_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const SolarPhoenixApp());
+}
+
+class SolarPhoenixApp extends StatefulWidget {
+  const SolarPhoenixApp({super.key});
+
+  @override
+  State<SolarPhoenixApp> createState() => _SolarPhoenixAppState();
+}
+
+class _SolarPhoenixAppState extends State<SolarPhoenixApp> {
+  bool _isDarkMode = false;
+
+  void _toggleTheme() {
+    setState(() {
+      _isDarkMode = !_isDarkMode;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Solar Phoenix',
+      theme: _isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
+      home: ThemeProvider(
+        isDarkMode: _isDarkMode,
+        toggleTheme: _toggleTheme,
+        child: const LoginScreen(),
+      ),
+      debugShowCheckedModeBanner: false,
+    );
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -28,15 +61,10 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Solar Phoenix',
-      theme: _isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
-      home: ThemeProvider(
-        isDarkMode: _isDarkMode,
-        toggleTheme: _toggleTheme,
-        child: const MainNavigationScreen(),
-      ),
-      debugShowCheckedModeBanner: false,
+    return ThemeProvider(
+      isDarkMode: _isDarkMode,
+      toggleTheme: _toggleTheme,
+      child: const MainNavigationScreen(),
     );
   }
 }
@@ -78,6 +106,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const LeadsScreen(),
     const DirectoryScreen(),
     const FollowUpsScreen(),
+    const OrdersScreen(),
   ];
 
   @override
@@ -107,6 +136,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.schedule),
             label: 'Follow-ups',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Orders',
           ),
         ],
       ),
