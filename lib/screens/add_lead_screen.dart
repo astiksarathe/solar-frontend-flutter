@@ -170,7 +170,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
@@ -537,6 +537,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                           ),
                   ),
                 ),
+                const SizedBox(height: 32), // Extra bottom padding
               ],
             ),
           ),

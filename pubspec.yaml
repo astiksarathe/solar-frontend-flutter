@@ -49,6 +49,15 @@ dependencies:
   
   # For storing user login state
   shared_preferences: ^2.2.2
+  
+  # For making phone calls and opening URLs
+  url_launcher: ^6.2.2
+  
+  # For speech-to-text functionality (temporarily disabled due to build issues)
+  # speech_to_text: ^5.4.3
+  
+  # For permissions (temporarily disabled due to build issues)
+  # permission_handler: ^10.4.5
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+// import 'package:speech_to_text/speech_to_text.dart';  // Temporarily disabled
+// import 'package:permission_handler/permission_handler.dart';  // Temporarily disabled
 import '../models/lead_models.dart';
 import '../services/lead_service.dart';
 
@@ -105,6 +108,24 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
     }
   }
 
+  Future<void> _makePhoneCall(String phone) async {
+    final Uri phoneUri = Uri(scheme: 'tel', path: phone);
+
+    try {
+      if (await canLaunchUrl(phoneUri)) {
+        await launchUrl(phoneUri);
+      } else {
+        if (mounted) {
+          _showAlert('Error', 'Cannot make call to $phone');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showAlert('Error', 'Error making call: $e');
+      }
+    }
+  }
+
   Future<void> _onAction(String type) async {
     setState(() {
       _actionsOpen = false;
@@ -113,16 +134,16 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
     switch (type) {
       case 'call':
         if (_lead?.phone != null) {
-          _showAlert('Call', 'Calling ${_lead!.phone}...');
+          _makePhoneCall(_lead!.phone);
         } else {
           _showAlert('Call', 'Phone number not available');
         }
         break;
       case 'meeting':
-        _showAlert('Schedule', 'Open schedule meeting flow (demo)');
+        _showScheduleMeetingDialog();
         break;
       case 'note':
-        _showAlert('Note', 'Add quick note (demo)');
+        _showAddNoteDialog();
         break;
     }
   }
@@ -139,6 +160,228 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
             child: const Text('OK'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showScheduleMeetingDialog() {
+    DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
+    TimeOfDay selectedTime = TimeOfDay.now();
+    final addressController = TextEditingController();
+    final notesController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Schedule Physical Meeting'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Date'),
+                const SizedBox(height: 8),
+                ListTile(
+                  leading: const Icon(Icons.calendar_today),
+                  title: Text(
+                    '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                  ),
+                  trailing: const Icon(Icons.edit),
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDate,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (date != null) {
+                      setState(() {
+                        selectedDate = date;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                const Text('Time'),
+                const SizedBox(height: 8),
+                ListTile(
+                  leading: const Icon(Icons.access_time),
+                  title: Text(selectedTime.format(context)),
+                  trailing: const Icon(Icons.edit),
+                  onTap: () async {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: selectedTime,
+                    );
+                    if (time != null) {
+                      setState(() {
+                        selectedTime = time;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                const Text('Meeting Address'),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: addressController,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter meeting address...',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+                const Text('Meeting Notes'),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: notesController,
+                  decoration: const InputDecoration(
+                    hintText: 'Additional notes...',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Save the meeting
+                _saveMeeting(
+                  selectedDate,
+                  selectedTime,
+                  addressController.text,
+                  notesController.text,
+                );
+                Navigator.of(context).pop();
+              },
+              child: const Text('Schedule'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _saveMeeting(
+    DateTime date,
+    TimeOfDay time,
+    String address,
+    String notes,
+  ) {
+    final meetingDateTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+
+    // Here you would typically save to a database or API
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Meeting scheduled for ${meetingDateTime.day}/${meetingDateTime.month}/${meetingDateTime.year} at ${time.format(context)}',
+        ),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _showAddNoteDialog() {
+    final noteController = TextEditingController();
+    // Speech-to-text temporarily disabled due to build issues
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Add Note'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: noteController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your note...',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.mic_none, color: Colors.grey),
+                      onPressed: () async {
+                        // Voice-to-text functionality temporarily disabled
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Voice-to-text feature coming soon! Please type your note for now.',
+                            ),
+                            backgroundColor: Colors.blue,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  maxLines: 5,
+                  minLines: 3,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Note: Voice input will be available in a future update.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _saveNote(noteController.text);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Save Note'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _saveNote(String note) {
+    if (note.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a note'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Here you would typically save to a database or API
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Note saved: ${note.substring(0, note.length > 30 ? 30 : note.length)}${note.length > 30 ? '...' : ''}',
+        ),
+        backgroundColor: Colors.green,
       ),
     );
   }

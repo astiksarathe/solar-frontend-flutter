@@ -10,6 +10,7 @@ import '../screens/orders_screen.dart';
 import '../screens/emi_calculator_screen.dart';
 import '../widgets/main_drawer.dart';
 import '../services/auth_service.dart';
+import '../screens/settings_screen.dart';
 
 class NavigationController extends StatefulWidget {
   const NavigationController({super.key});
@@ -40,7 +41,7 @@ class _NavigationControllerState extends State<NavigationController> {
       'orders': const OrdersScreen(),
       'emi_calculator': const EMICalculatorScreen(),
       'customer_lookup': const HomeScreen(),
-      'settings': const DashboardScreen(),
+      'settings': const SettingsScreen(),
       // Legacy routes for backward compatibility
       'analytics': const _ComingSoonScreen(title: 'Analytics'),
       'solar_calculator': const _ComingSoonScreen(title: 'Solar Calculator'),
@@ -312,13 +313,6 @@ class _NavigationControllerState extends State<NavigationController> {
           onPressed: () => _navigateToRoute('add_lead', fromDrawer: false),
           tooltip: 'Add Lead',
           child: const Icon(Icons.person_add),
-        );
-      case 'directory':
-        return FloatingActionButton(
-          heroTag: "directory_fab",
-          onPressed: () => _navigateToRoute('add_lead', fromDrawer: false),
-          tooltip: 'Add Contact',
-          child: const Icon(Icons.add),
         );
       case 'orders':
         return FloatingActionButton(
