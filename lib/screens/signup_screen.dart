@@ -1,32 +1,44 @@
 import 'package:flutter/material.dart';
-import '../navigation/navigation_controller.dart';
 import '../services/auth_service.dart';
-import 'signup_screen.dart';
-import 'forgot_password_screen.dart';
+import 'login_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _showPassword = false;
+  bool _showConfirmPassword = false;
   bool _isLoading = false;
+  bool _agreeToTerms = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _handleSignUp() async {
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (!_agreeToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please agree to the Terms and Conditions'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -35,17 +47,22 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final result = await AuthService.signIn(
+      final result = await AuthService.register(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
       if (mounted) {
         if (result['success']) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const NavigationController(),
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message']),
+              backgroundColor: Colors.green,
             ),
+          );
+          // Navigate back to login screen
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -60,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Login failed: $e'),
+            content: Text('Registration failed: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -74,15 +91,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _handleSignUp() {
+  void _handleBackToLogin() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const SignUpScreen()),
-    );
-  }
-
-  void _handleForgotPassword() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
 
@@ -102,6 +113,16 @@ class _LoginScreenState extends State<LoginScreen> {
     }
     if (value.length < 6) {
       return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  String? _validateConfirmPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please confirm your password';
+    }
+    if (value != _passwordController.text) {
+      return 'Passwords do not match';
     }
     return null;
   }
@@ -141,21 +162,21 @@ class _LoginScreenState extends State<LoginScreen> {
           SafeArea(
             child: Column(
               children: [
-                // Logo section
+                // Header section
                 Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // Logo image placeholder
                         Container(
-                          width: 84,
-                          height: 84,
+                          width: 64,
+                          height: 64,
                           margin: const EdgeInsets.only(bottom: 8),
                           decoration: BoxDecoration(
                             color: colorScheme.primary,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
                                 color: colorScheme.primary.withOpacity(0.3),
@@ -166,17 +187,26 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           child: Icon(
                             Icons.wb_sunny,
-                            size: 48,
+                            size: 36,
                             color: colorScheme.onPrimary,
                           ),
                         ),
                         Text(
-                          'Solar-Stack',
-                          style: theme.textTheme.headlineMedium?.copyWith(
+                          'Create Account',
+                          style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w800,
                             color: isDarkMode
                                 ? colorScheme.onSurface
                                 : Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Join Solar-Stack today',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: isDarkMode
+                                ? colorScheme.onSurface.withOpacity(0.7)
+                                : Colors.white.withOpacity(0.7),
                           ),
                         ),
                       ],
@@ -186,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // Form section
                 Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
                     child: Center(
@@ -231,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               : Colors.white,
                                         ),
                                         decoration: InputDecoration(
-                                          hintText: 'Email address',
+                                          hintText: 'Enter your email',
                                           hintStyle: TextStyle(
                                             color: isDarkMode
                                                 ? colorScheme.onSurface
@@ -279,15 +309,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                         controller: _passwordController,
                                         validator: _validatePassword,
                                         obscureText: !_showPassword,
-                                        textInputAction: TextInputAction.done,
-                                        onFieldSubmitted: (_) => _handleLogin(),
+                                        textInputAction: TextInputAction.next,
                                         style: TextStyle(
                                           color: isDarkMode
                                               ? colorScheme.onSurface
                                               : Colors.white,
                                         ),
                                         decoration: InputDecoration(
-                                          hintText: 'Password',
+                                          hintText: 'Create a password',
                                           hintStyle: TextStyle(
                                             color: isDarkMode
                                                 ? colorScheme.onSurface
@@ -331,17 +360,64 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: 16),
 
-                                  // Forgot password
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: TextButton(
-                                      onPressed: _handleForgotPassword,
-                                      child: Text(
-                                        'Forgot Password?',
-                                        style: theme.textTheme.bodySmall
+                                  // Confirm Password field
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Confirm Password',
+                                        style: theme.textTheme.bodyMedium
                                             ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: isDarkMode
+                                                  ? colorScheme.onSurface
+                                                  : Colors.white,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextFormField(
+                                        controller: _confirmPasswordController,
+                                        validator: _validateConfirmPassword,
+                                        obscureText: !_showConfirmPassword,
+                                        textInputAction: TextInputAction.done,
+                                        onFieldSubmitted: (_) =>
+                                            _handleSignUp(),
+                                        style: TextStyle(
+                                          color: isDarkMode
+                                              ? colorScheme.onSurface
+                                              : Colors.white,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: 'Confirm your password',
+                                          hintStyle: TextStyle(
+                                            color: isDarkMode
+                                                ? colorScheme.onSurface
+                                                      .withOpacity(0.5)
+                                                : Colors.white.withOpacity(0.5),
+                                          ),
+                                          filled: true,
+                                          fillColor: isDarkMode
+                                              ? Colors.white.withOpacity(0.02)
+                                              : const Color(0xFF0f2a35),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 16,
+                                              ),
+                                          suffixIcon: IconButton(
+                                            icon: Icon(
+                                              _showConfirmPassword
+                                                  ? Icons.visibility_off
+                                                  : Icons.visibility,
                                               color: isDarkMode
                                                   ? colorScheme.onSurface
                                                         .withOpacity(0.7)
@@ -349,18 +425,84 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       0.7,
                                                     ),
                                             ),
+                                            onPressed: () {
+                                              setState(() {
+                                                _showConfirmPassword =
+                                                    !_showConfirmPassword;
+                                              });
+                                            },
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: 16),
 
-                                  // Login button
+                                  // Terms and conditions checkbox
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Checkbox(
+                                        value: _agreeToTerms,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _agreeToTerms = value ?? false;
+                                          });
+                                        },
+                                        activeColor: colorScheme.secondary,
+                                        checkColor: colorScheme.onSecondary,
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 12,
+                                          ),
+                                          child: RichText(
+                                            text: TextSpan(
+                                              text: 'I agree to the ',
+                                              style: theme.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color: isDarkMode
+                                                        ? colorScheme.onSurface
+                                                              .withOpacity(0.7)
+                                                        : Colors.white
+                                                              .withOpacity(0.7),
+                                                  ),
+                                              children: [
+                                                TextSpan(
+                                                  text: 'Terms and Conditions',
+                                                  style: TextStyle(
+                                                    color:
+                                                        colorScheme.secondary,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                                const TextSpan(text: ' and '),
+                                                TextSpan(
+                                                  text: 'Privacy Policy',
+                                                  style: TextStyle(
+                                                    color:
+                                                        colorScheme.secondary,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 24),
+
+                                  // Sign up button
                                   SizedBox(
                                     height: 48,
                                     child: ElevatedButton(
                                       onPressed: _isLoading
                                           ? null
-                                          : _handleLogin,
+                                          : _handleSignUp,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: colorScheme.secondary,
                                         foregroundColor:
@@ -385,7 +527,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               ),
                                             )
                                           : Text(
-                                              'LOGIN',
+                                              'CREATE ACCOUNT',
                                               style: TextStyle(
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.w800,
@@ -405,11 +547,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                   const SizedBox(height: 22),
 
-                                  // Sign up link
+                                  // Sign in link
                                   Center(
                                     child: RichText(
                                       text: TextSpan(
-                                        text: "Don't have an account? ",
+                                        text: "Already have an account? ",
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                               color: isDarkMode
@@ -422,9 +564,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                         children: [
                                           WidgetSpan(
                                             child: GestureDetector(
-                                              onTap: _handleSignUp,
+                                              onTap: _handleBackToLogin,
                                               child: Text(
-                                                'Sign up',
+                                                'Sign in',
                                                 style: TextStyle(
                                                   color: colorScheme.secondary,
                                                   fontWeight: FontWeight.w700,

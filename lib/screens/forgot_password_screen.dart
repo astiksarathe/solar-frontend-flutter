@@ -1,31 +1,32 @@
 import 'package:flutter/material.dart';
-import '../navigation/navigation_controller.dart';
 import '../services/auth_service.dart';
-import 'signup_screen.dart';
-import 'forgot_password_screen.dart';
+import 'login_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _showPassword = false;
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  bool _showNewPassword = false;
+  bool _showConfirmPassword = false;
   bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _handleResetPassword() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -35,17 +36,22 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final result = await AuthService.signIn(
+      final result = await AuthService.resetPassword(
         email: _emailController.text.trim(),
-        password: _passwordController.text,
+        newPassword: _newPasswordController.text,
       );
 
       if (mounted) {
         if (result['success']) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const NavigationController(),
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message']),
+              backgroundColor: Colors.green,
             ),
+          );
+          // Navigate back to login screen
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -60,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Login failed: $e'),
+            content: Text('Password reset failed: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -74,15 +80,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _handleSignUp() {
+  void _handleBackToLogin() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const SignUpScreen()),
-    );
-  }
-
-  void _handleForgotPassword() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
 
@@ -102,6 +102,16 @@ class _LoginScreenState extends State<LoginScreen> {
     }
     if (value.length < 6) {
       return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  String? _validateConfirmPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please confirm your password';
+    }
+    if (value != _newPasswordController.text) {
+      return 'Passwords do not match';
     }
     return null;
   }
@@ -141,42 +151,80 @@ class _LoginScreenState extends State<LoginScreen> {
           SafeArea(
             child: Column(
               children: [
-                // Logo section
+                // Back button and header
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: _handleBackToLogin,
+                        icon: Icon(
+                          Icons.arrow_back,
+                          color: isDarkMode
+                              ? colorScheme.onSurface
+                              : Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Reset Password',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: isDarkMode
+                              ? colorScheme.onSurface
+                              : Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Header section
                 Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Logo image placeholder
+                        // Icon
                         Container(
-                          width: 84,
-                          height: 84,
-                          margin: const EdgeInsets.only(bottom: 8),
+                          width: 80,
+                          height: 80,
+                          margin: const EdgeInsets.only(bottom: 16),
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: colorScheme.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: colorScheme.primary.withOpacity(0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
+                            border: Border.all(
+                              color: colorScheme.primary.withOpacity(0.3),
+                              width: 2,
+                            ),
                           ),
                           child: Icon(
-                            Icons.wb_sunny,
-                            size: 48,
-                            color: colorScheme.onPrimary,
+                            Icons.lock_reset,
+                            size: 40,
+                            color: colorScheme.primary,
                           ),
                         ),
                         Text(
-                          'Solar-Stack',
-                          style: theme.textTheme.headlineMedium?.copyWith(
+                          'Reset Your Password',
+                          style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w800,
                             color: isDarkMode
                                 ? colorScheme.onSurface
                                 : Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Text(
+                            'Enter your email and new password to reset your account password',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: isDarkMode
+                                  ? colorScheme.onSurface.withOpacity(0.7)
+                                  : Colors.white.withOpacity(0.7),
+                            ),
                           ),
                         ),
                       ],
@@ -231,7 +279,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               : Colors.white,
                                         ),
                                         decoration: InputDecoration(
-                                          hintText: 'Email address',
+                                          hintText: 'Enter your email address',
                                           hintStyle: TextStyle(
                                             color: isDarkMode
                                                 ? colorScheme.onSurface
@@ -253,19 +301,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 horizontal: 12,
                                                 vertical: 16,
                                               ),
+                                          prefixIcon: Icon(
+                                            Icons.email_outlined,
+                                            color: isDarkMode
+                                                ? colorScheme.onSurface
+                                                      .withOpacity(0.7)
+                                                : Colors.white.withOpacity(0.7),
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 16),
+                                  const SizedBox(height: 20),
 
-                                  // Password field
+                                  // New Password field
                                   Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Password',
+                                        'New Password',
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                               fontWeight: FontWeight.w600,
@@ -276,18 +331,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                       const SizedBox(height: 8),
                                       TextFormField(
-                                        controller: _passwordController,
+                                        controller: _newPasswordController,
                                         validator: _validatePassword,
-                                        obscureText: !_showPassword,
-                                        textInputAction: TextInputAction.done,
-                                        onFieldSubmitted: (_) => _handleLogin(),
+                                        obscureText: !_showNewPassword,
+                                        textInputAction: TextInputAction.next,
                                         style: TextStyle(
                                           color: isDarkMode
                                               ? colorScheme.onSurface
                                               : Colors.white,
                                         ),
                                         decoration: InputDecoration(
-                                          hintText: 'Password',
+                                          hintText: 'Enter new password',
                                           hintStyle: TextStyle(
                                             color: isDarkMode
                                                 ? colorScheme.onSurface
@@ -309,9 +363,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 horizontal: 12,
                                                 vertical: 16,
                                               ),
+                                          prefixIcon: Icon(
+                                            Icons.lock_outlined,
+                                            color: isDarkMode
+                                                ? colorScheme.onSurface
+                                                      .withOpacity(0.7)
+                                                : Colors.white.withOpacity(0.7),
+                                          ),
                                           suffixIcon: IconButton(
                                             icon: Icon(
-                                              _showPassword
+                                              _showNewPassword
                                                   ? Icons.visibility_off
                                                   : Icons.visibility,
                                               color: isDarkMode
@@ -323,7 +384,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                             ),
                                             onPressed: () {
                                               setState(() {
-                                                _showPassword = !_showPassword;
+                                                _showNewPassword =
+                                                    !_showNewPassword;
                                               });
                                             },
                                           ),
@@ -331,17 +393,71 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: 16),
 
-                                  // Forgot password
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: TextButton(
-                                      onPressed: _handleForgotPassword,
-                                      child: Text(
-                                        'Forgot Password?',
-                                        style: theme.textTheme.bodySmall
+                                  // Confirm Password field
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Confirm New Password',
+                                        style: theme.textTheme.bodyMedium
                                             ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: isDarkMode
+                                                  ? colorScheme.onSurface
+                                                  : Colors.white,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextFormField(
+                                        controller: _confirmPasswordController,
+                                        validator: _validateConfirmPassword,
+                                        obscureText: !_showConfirmPassword,
+                                        textInputAction: TextInputAction.done,
+                                        onFieldSubmitted: (_) =>
+                                            _handleResetPassword(),
+                                        style: TextStyle(
+                                          color: isDarkMode
+                                              ? colorScheme.onSurface
+                                              : Colors.white,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: 'Confirm new password',
+                                          hintStyle: TextStyle(
+                                            color: isDarkMode
+                                                ? colorScheme.onSurface
+                                                      .withOpacity(0.5)
+                                                : Colors.white.withOpacity(0.5),
+                                          ),
+                                          filled: true,
+                                          fillColor: isDarkMode
+                                              ? Colors.white.withOpacity(0.02)
+                                              : const Color(0xFF0f2a35),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 16,
+                                              ),
+                                          prefixIcon: Icon(
+                                            Icons.lock_outlined,
+                                            color: isDarkMode
+                                                ? colorScheme.onSurface
+                                                      .withOpacity(0.7)
+                                                : Colors.white.withOpacity(0.7),
+                                          ),
+                                          suffixIcon: IconButton(
+                                            icon: Icon(
+                                              _showConfirmPassword
+                                                  ? Icons.visibility_off
+                                                  : Icons.visibility,
                                               color: isDarkMode
                                                   ? colorScheme.onSurface
                                                         .withOpacity(0.7)
@@ -349,18 +465,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       0.7,
                                                     ),
                                             ),
+                                            onPressed: () {
+                                              setState(() {
+                                                _showConfirmPassword =
+                                                    !_showConfirmPassword;
+                                              });
+                                            },
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: 32),
 
-                                  // Login button
+                                  // Reset password button
                                   SizedBox(
                                     height: 48,
                                     child: ElevatedButton(
                                       onPressed: _isLoading
                                           ? null
-                                          : _handleLogin,
+                                          : _handleResetPassword,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: colorScheme.secondary,
                                         foregroundColor:
@@ -385,7 +509,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               ),
                                             )
                                           : Text(
-                                              'LOGIN',
+                                              'RESET PASSWORD',
                                               style: TextStyle(
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.w800,
@@ -394,45 +518,34 @@ class _LoginScreenState extends State<LoginScreen> {
                                             ),
                                     ),
                                   ),
-                                  const SizedBox(height: 22),
+                                  const SizedBox(height: 24),
 
-                                  // Divider
-                                  Container(
-                                    height: 1,
-                                    color: isDarkMode
-                                        ? Colors.white.withOpacity(0.04)
-                                        : Colors.white.withOpacity(0.06),
-                                  ),
-                                  const SizedBox(height: 22),
-
-                                  // Sign up link
+                                  // Back to login link
                                   Center(
-                                    child: RichText(
-                                      text: TextSpan(
-                                        text: "Don't have an account? ",
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                              color: isDarkMode
-                                                  ? colorScheme.onSurface
-                                                        .withOpacity(0.7)
-                                                  : Colors.white.withOpacity(
-                                                      0.7,
-                                                    ),
-                                            ),
-                                        children: [
-                                          WidgetSpan(
-                                            child: GestureDetector(
-                                              onTap: _handleSignUp,
-                                              child: Text(
-                                                'Sign up',
-                                                style: TextStyle(
-                                                  color: colorScheme.secondary,
-                                                  fontWeight: FontWeight.w700,
-                                                ),
+                                    child: TextButton(
+                                      onPressed: _handleBackToLogin,
+                                      child: RichText(
+                                        text: TextSpan(
+                                          text: "Remember your password? ",
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                color: isDarkMode
+                                                    ? colorScheme.onSurface
+                                                          .withOpacity(0.7)
+                                                    : Colors.white.withOpacity(
+                                                        0.7,
+                                                      ),
+                                              ),
+                                          children: [
+                                            TextSpan(
+                                              text: 'Sign in',
+                                              style: TextStyle(
+                                                color: colorScheme.secondary,
+                                                fontWeight: FontWeight.w700,
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
