@@ -197,15 +197,12 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                 const Text('Follow-up Type'),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: selectedFollowUpType,
+                  initialValue: selectedFollowUpType,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),
                   items: followUpTypes.map((type) {
-                    return DropdownMenuItem(
-                      value: type,
-                      child: Text(type),
-                    );
+                    return DropdownMenuItem(value: type, child: Text(type));
                   }).toList(),
                   onChanged: (value) {
                     if (value != null) {
@@ -258,21 +255,25 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                   },
                 ),
                 // Show address field only for physical follow-ups
-                if (['Meeting', 'Site Visit'].contains(selectedFollowUpType)) ...[
+                if ([
+                  'Meeting',
+                  'Site Visit',
+                ].contains(selectedFollowUpType)) ...[
                   const SizedBox(height: 16),
-                  Text('${selectedFollowUpType} Address'),
+                  Text('$selectedFollowUpType Address'),
                   const SizedBox(height: 8),
                   TextField(
                     controller: addressController,
                     decoration: InputDecoration(
-                      hintText: 'Enter ${selectedFollowUpType.toLowerCase()} address...',
+                      hintText:
+                          'Enter ${selectedFollowUpType.toLowerCase()} address...',
                       border: const OutlineInputBorder(),
                     ),
                     maxLines: 2,
                   ),
                 ],
                 const SizedBox(height: 16),
-                Text('${selectedFollowUpType} Notes'),
+                Text('$selectedFollowUpType Notes'),
                 const SizedBox(height: 8),
                 TextField(
                   controller: notesController,
@@ -326,10 +327,13 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
     );
 
     String message;
-    if (['Meeting', 'Site Visit'].contains(followUpType) && address.isNotEmpty) {
-      message = '$followUpType scheduled for ${followUpDateTime.day}/${followUpDateTime.month}/${followUpDateTime.year} at ${time.format(context)} - Location: $address';
+    if (['Meeting', 'Site Visit'].contains(followUpType) &&
+        address.isNotEmpty) {
+      message =
+          '$followUpType scheduled for ${followUpDateTime.day}/${followUpDateTime.month}/${followUpDateTime.year} at ${time.format(context)} - Location: $address';
     } else {
-      message = '$followUpType scheduled for ${followUpDateTime.day}/${followUpDateTime.month}/${followUpDateTime.year} at ${time.format(context)}';
+      message =
+          '$followUpType scheduled for ${followUpDateTime.day}/${followUpDateTime.month}/${followUpDateTime.year} at ${time.format(context)}';
     }
 
     // Here you would typically save to a database or API
@@ -522,14 +526,18 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
           label,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface.withOpacity(0.6),
+            height: 1.2,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         Text(
           value,
           style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
+            height: 1.3,
           ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
         ),
       ],
     );
@@ -540,19 +548,20 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(color: colorScheme.outline.withOpacity(0.1)),
         ),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
               color: colorScheme.surfaceContainerHighest,
             ),
             child: Center(
@@ -561,44 +570,65 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                 style: TextStyle(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w700,
+                  fontSize: 16,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  item.type,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.type,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${item.at.day}/${item.at.month}/${item.at.year}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.6),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   item.note,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.6),
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                    height: 1.4,
                   ),
                 ),
                 if (item.done && item.actor != null) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    'Done by ${item.actor}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.4),
-                    ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        size: 14,
+                        color: Colors.green.withOpacity(0.7),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Done by ${item.actor}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.green.withOpacity(0.8),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ],
-            ),
-          ),
-          Text(
-            '${item.at.day}/${item.at.month}/${item.at.year}',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
         ],
@@ -650,9 +680,10 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                   background: Container(
                     padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         _buildAvatar(_lead!.name, colorScheme),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 16),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -662,14 +693,20 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                                 _lead!.name,
                                 style: theme.textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.w800,
+                                  height: 1.2,
                                 ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 6),
                               Text(
                                 '${_lead!.phone} • ${_lead!.divisionName ?? 'Unknown Division'}',
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: colorScheme.onSurface.withOpacity(0.6),
+                                  height: 1.3,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
@@ -688,22 +725,33 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                     title: 'Solar requirements',
                     child: Column(
                       children: [
-                        _buildKeyValue(
-                          'Monthly units',
-                          _lead!.monthlyUnits ?? '—',
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildKeyValue(
+                                'Monthly units',
+                                _lead!.monthlyUnits ?? '—',
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildKeyValue(
+                                'Avg last 6 months',
+                                _lead!.avgUnits ?? '—',
+                              ),
+                            ),
+                          ],
                         ),
                         if (_lead!.amount != null) ...[
-                          const SizedBox(height: 12),
-                          _buildKeyValue(
-                            'Estimated amount',
-                            '₹${_lead!.amount}',
+                          const SizedBox(height: 16),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: _buildKeyValue(
+                              'Estimated amount',
+                              '₹${_lead!.amount}',
+                            ),
                           ),
                         ],
-                        const SizedBox(height: 12),
-                        _buildKeyValue(
-                          'Avg last 6 months',
-                          _lead!.avgUnits ?? '—',
-                        ),
                       ],
                     ),
                   ),
@@ -716,57 +764,103 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Expanded(
-                                    child: Text(
-                                      '${_lead!.reminderAt!.day}/${_lead!.reminderAt!.month}/${_lead!.reminderAt!.year} ${_lead!.reminderAt!.hour}:${_lead!.reminderAt!.minute.toString().padLeft(2, '0')}',
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                                    flex: 2,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Date & Time',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withOpacity(0.6),
+                                                height: 1.2,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${_lead!.reminderAt!.day}/${_lead!.reminderAt!.month}/${_lead!.reminderAt!.year} ${_lead!.reminderAt!.hour}:${_lead!.reminderAt!.minute.toString().padLeft(2, '0')}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                                height: 1.3,
+                                              ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  if (_lead!.reminderType != null) ...[
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(14),
-                                        color: _badgeColorForType(
-                                          _lead!.reminderType,
-                                          colorScheme,
+                                  const SizedBox(width: 12),
+                                  if (_lead!.reminderType != null)
+                                    Flexible(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                          color: _badgeColorForType(
+                                            _lead!.reminderType,
+                                            Theme.of(context).colorScheme,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          _lead!.reminderType!.toUpperCase(),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 10,
+                                              ),
+                                          textAlign: TextAlign.center,
                                         ),
                                       ),
-                                      child: Text(
-                                        _lead!.reminderType!.toUpperCase(),
-                                        style: theme.textTheme.labelSmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                      ),
                                     ),
-                                  ],
                                 ],
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Note',
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface.withOpacity(0.6),
+                                      height: 1.2,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
                               Text(
                                 _lead!.reminderNote ?? 'No note',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.onSurface.withOpacity(0.6),
-                                ),
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.4,
+                                    ),
                               ),
                             ],
                           )
                         : Text(
                             'No reminder set',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.6),
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface.withOpacity(0.6),
+                                ),
                           ),
                   ),
 
@@ -775,13 +869,48 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                     title: 'History',
                     action: IconButton(
                       onPressed: () => _showAlert('Add', 'Add history event'),
-                      icon: Icon(Icons.add, color: colorScheme.primary),
+                      icon: Icon(
+                        Icons.add,
+                        color: colorScheme.primary,
+                        size: 20,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 36,
+                        minHeight: 36,
+                      ),
+                      padding: EdgeInsets.zero,
                     ),
-                    child: Column(
-                      children: _history
-                          .map((item) => _buildHistoryItem(item))
-                          .toList(),
-                    ),
+                    child: _history.isEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Center(
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.history,
+                                    size: 48,
+                                    color: colorScheme.onSurface.withOpacity(
+                                      0.3,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'No history yet',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: colorScheme.onSurface.withOpacity(
+                                        0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : Column(
+                            children: _history
+                                .map((item) => _buildHistoryItem(item))
+                                .toList(),
+                          ),
                   ),
 
                   const SizedBox(height: 100), // Space for FAB
@@ -792,8 +921,8 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
 
           // Floating Action Button
           Positioned(
-            right: 18,
-            bottom: 26,
+            right: 20,
+            bottom: 30,
             child: FloatingActionButton(
               heroTag: "lead_detail_fab",
               onPressed: () {
@@ -803,7 +932,8 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
               },
               backgroundColor: colorScheme.primary,
               foregroundColor: colorScheme.onPrimary,
-              child: const Icon(Icons.add),
+              elevation: 6,
+              child: const Icon(Icons.add, size: 24),
             ),
           ),
 
@@ -849,17 +979,31 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                         ),
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(
+                                color: colorScheme.outline.withOpacity(0.1),
+                              ),
+                            ),
+                          ),
                           child: TextButton(
                             onPressed: () {
                               setState(() {
                                 _actionsOpen = false;
                               });
                             },
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
                             child: Text(
                               'Cancel',
                               style: TextStyle(
                                 color: colorScheme.onSurface.withOpacity(0.6),
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -886,8 +1030,14 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
 
     return InkWell(
       onTap: onTap,
+      borderRadius: isLast
+          ? const BorderRadius.only(
+              bottomLeft: Radius.circular(12),
+              bottomRight: Radius.circular(12),
+            )
+          : BorderRadius.zero,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
         decoration: BoxDecoration(
           border: isLast
               ? null
@@ -899,13 +1049,31 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
         ),
         child: Row(
           children: [
-            Icon(icon, color: colorScheme.primary, size: 18),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: colorScheme.primary.withOpacity(0.1),
               ),
+              child: Center(
+                child: Icon(icon, color: colorScheme.primary, size: 18),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  height: 1.2,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 14,
+              color: colorScheme.onSurface.withOpacity(0.4),
             ),
           ],
         ),
