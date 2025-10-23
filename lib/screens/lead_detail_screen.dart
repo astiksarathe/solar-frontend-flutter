@@ -139,8 +139,8 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
           _showAlert('Call', 'Phone number not available');
         }
         break;
-      case 'meeting':
-        _showScheduleMeetingDialog();
+      case 'schedule':
+        _showScheduleFollowUpDialog();
         break;
       case 'note':
         _showAddNoteDialog();
@@ -164,22 +164,58 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
     );
   }
 
-  void _showScheduleMeetingDialog() {
+  void _showScheduleFollowUpDialog() {
     DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
     TimeOfDay selectedTime = TimeOfDay.now();
+    String selectedFollowUpType = 'Call';
     final addressController = TextEditingController();
     final notesController = TextEditingController();
+
+    final followUpTypes = [
+      'Call',
+      'Meeting',
+      'Site Visit',
+      'Video Call',
+      'Email Follow-up',
+      'WhatsApp Follow-up',
+      'Document Review',
+      'Technical Discussion',
+      'Quote Discussion',
+      'Final Closing',
+    ];
 
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Schedule Physical Meeting'),
+          title: const Text('Schedule Follow-up'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const Text('Follow-up Type'),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: selectedFollowUpType,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  items: followUpTypes.map((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Text(type),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        selectedFollowUpType = value;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
                 const Text('Date'),
                 const SizedBox(height: 8),
                 ListTile(
@@ -221,19 +257,22 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                     }
                   },
                 ),
-                const SizedBox(height: 16),
-                const Text('Meeting Address'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: addressController,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter meeting address...',
-                    border: OutlineInputBorder(),
+                // Show address field only for physical follow-ups
+                if (['Meeting', 'Site Visit'].contains(selectedFollowUpType)) ...[
+                  const SizedBox(height: 16),
+                  Text('${selectedFollowUpType} Address'),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: addressController,
+                    decoration: InputDecoration(
+                      hintText: 'Enter ${selectedFollowUpType.toLowerCase()} address...',
+                      border: const OutlineInputBorder(),
+                    ),
+                    maxLines: 2,
                   ),
-                  maxLines: 2,
-                ),
+                ],
                 const SizedBox(height: 16),
-                const Text('Meeting Notes'),
+                Text('${selectedFollowUpType} Notes'),
                 const SizedBox(height: 8),
                 TextField(
                   controller: notesController,
@@ -253,8 +292,9 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                // Save the meeting
-                _saveMeeting(
+                // Save the follow-up
+                _saveFollowUp(
+                  selectedFollowUpType,
                   selectedDate,
                   selectedTime,
                   addressController.text,
@@ -270,13 +310,14 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
     );
   }
 
-  void _saveMeeting(
+  void _saveFollowUp(
+    String followUpType,
     DateTime date,
     TimeOfDay time,
     String address,
     String notes,
   ) {
-    final meetingDateTime = DateTime(
+    final followUpDateTime = DateTime(
       date.year,
       date.month,
       date.day,
@@ -284,15 +325,35 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
       time.minute,
     );
 
+    String message;
+    if (['Meeting', 'Site Visit'].contains(followUpType) && address.isNotEmpty) {
+      message = '$followUpType scheduled for ${followUpDateTime.day}/${followUpDateTime.month}/${followUpDateTime.year} at ${time.format(context)} - Location: $address';
+    } else {
+      message = '$followUpType scheduled for ${followUpDateTime.day}/${followUpDateTime.month}/${followUpDateTime.year} at ${time.format(context)}';
+    }
+
     // Here you would typically save to a database or API
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          'Meeting scheduled for ${meetingDateTime.day}/${meetingDateTime.month}/${meetingDateTime.year} at ${time.format(context)}',
-        ),
+        content: Text(message),
         backgroundColor: Colors.green,
+        duration: const Duration(seconds: 4),
       ),
     );
+
+    // Add to history
+    setState(() {
+      _history.insert(
+        0,
+        HistoryItem(
+          id: 'h${DateTime.now().millisecondsSinceEpoch}',
+          type: followUpType,
+          note: notes.isNotEmpty ? notes : 'Scheduled $followUpType',
+          at: followUpDateTime,
+          done: false,
+        ),
+      );
+    });
   }
 
   void _showAddNoteDialog() {
@@ -777,8 +838,8 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
                         ),
                         _buildActionOption(
                           icon: Icons.calendar_today,
-                          title: 'Schedule meeting',
-                          onTap: () => _onAction('meeting'),
+                          title: 'Schedule follow-up',
+                          onTap: () => _onAction('schedule'),
                         ),
                         _buildActionOption(
                           icon: Icons.edit,
