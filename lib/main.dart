@@ -51,7 +51,12 @@ class ThemeProvider extends InheritedWidget {
   });
 
   static ThemeProvider? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ThemeProvider>();
+    try {
+      return context.dependOnInheritedWidgetOfExactType<ThemeProvider>();
+    } catch (e) {
+      // If context is deactivated, return null
+      return null;
+    }
   }
 
   @override

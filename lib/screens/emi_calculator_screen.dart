@@ -62,7 +62,9 @@ class _EMICalculatorScreenState extends State<EMICalculatorScreen> {
   void _onInputChanged() {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 400), () {
-      _calculateEMI();
+      if (mounted) {
+        _calculateEMI();
+      }
     });
   }
 
