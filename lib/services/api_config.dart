@@ -6,10 +6,10 @@ import 'auth_service.dart';
 import 'navigation_service.dart';
 
 class ApiConfig {
-  static const String baseUrl = 'http://localhost:3000';
-  static const String androidEmulatorUrl = 'http://10.0.2.2:3000';
-  static const String prodUrl = 'https://api.solarstack.com';
-  static const String stagingUrl = 'https://api-staging.solarstack.com';
+  static const String baseUrl = 'https://solar-backend-tan.vercel.app';
+  static const String androidEmulatorUrl = 'https://solar-backend-tan.vercel.app';
+  static const String prodUrl = 'https://solar-backend-tan.vercel.app';
+  static const String stagingUrl = 'https://solar-backend-tan.vercel.app';
 
   // Use appropriate URL based on platform
   static String get apiBaseUrl {
