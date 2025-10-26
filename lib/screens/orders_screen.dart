@@ -16,6 +16,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   List<SolarOrder> _orders = [];
   String _query = '';
   bool _loading = true;
+  String? _error;
   OrderStatus? _selectedStatus;
 
   @override
@@ -27,14 +28,67 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Future<void> _loadOrders() async {
     setState(() {
       _loading = true;
+      _error = null;
     });
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      final result = await OrderService.getAllOrders(limit: 50);
 
-    setState(() {
-      _orders = OrderService.getOrders();
-      _loading = false;
-    });
+      if (result.success && result.data != null) {
+        final ordersData = result.data!.data;
+        setState(() {
+          // Convert API response to SolarOrder objects
+          _orders = ordersData.map((item) {
+            return SolarOrder(
+              id: item['id'] ?? '',
+              orderId: item['orderNumber'] ?? '',
+              customerName: item['customerName'] ?? '',
+              customerPhone: item['customerPhone'] ?? '',
+              customerEmail: item['customerEmail'] ?? '',
+              systemCapacity: (item['systemSize'] ?? 0.0).toDouble(),
+              panelBrand: item['panelBrand'] ?? 'TBD',
+              inverterBrand: item['inverterBrand'] ?? 'TBD',
+              status: _mapStringToOrderStatus(item['status'] ?? 'PENDING'),
+              createdAt: item['createdAt'] != null
+                  ? DateTime.parse(item['createdAt'])
+                  : DateTime.now(),
+              expectedCompletionDate: item['expectedCompletionDate'] != null
+                  ? DateTime.parse(item['expectedCompletionDate'])
+                  : null,
+              assignedTo: item['assignedToName'],
+              installationAddress: item['installationAddress']?['street'] ?? '',
+              stages: [], // Will be populated from detailed API call
+            );
+          }).toList();
+          _loading = false;
+        });
+      } else {
+        setState(() {
+          _error = result.message ?? 'Failed to load orders';
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = 'Network error: $e';
+        _loading = false;
+      });
+    }
+  }
+
+  OrderStatus _mapStringToOrderStatus(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDING':
+        return OrderStatus.confirmed;
+      case 'IN_PROGRESS':
+        return OrderStatus.panelInstallation;
+      case 'COMPLETED':
+        return OrderStatus.completed;
+      case 'CANCELLED':
+        return OrderStatus.cancelled;
+      default:
+        return OrderStatus.confirmed;
+    }
   }
 
   List<SolarOrder> get _filteredOrders {
@@ -42,7 +96,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
     // Filter by search query
     if (_query.isNotEmpty) {
-      filtered = OrderService.searchOrders(_query);
+      final lowercaseQuery = _query.toLowerCase();
+      filtered = filtered.where((order) {
+        return order.customerName.toLowerCase().contains(lowercaseQuery) ||
+            order.orderId.toLowerCase().contains(lowercaseQuery) ||
+            order.customerPhone.contains(_query) ||
+            order.customerEmail.toLowerCase().contains(lowercaseQuery);
+      }).toList();
     }
 
     // Filter by status
@@ -193,6 +253,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
+                : _error != null
+                ? _buildErrorState(theme)
                 : filteredOrders.isEmpty
                 ? _buildEmptyState(theme)
                 : _buildOrdersList(filteredOrders, theme),
@@ -222,6 +284,38 @@ class _OrdersScreenState extends State<OrdersScreen> {
       labelStyle: TextStyle(
         color: isSelected ? colorScheme.primary : colorScheme.onSurface,
         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+      ),
+    );
+  }
+
+  Widget _buildErrorState(ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 80, color: theme.colorScheme.error),
+          const SizedBox(height: 16),
+          Text(
+            'Error',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.error,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _error!,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _loadOrders,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }
@@ -359,8 +453,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       theme,
                     ),
                   ),
-                  if (OrderService.canViewCostBreakdown() &&
-                      order.costBreakdown != null)
+                  // Always show total cost for now (can be controlled by user role later)
+                  if (order.costBreakdown != null)
                     Expanded(
                       child: _buildInfoItem(
                         'Total Cost',

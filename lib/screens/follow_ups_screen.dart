@@ -20,6 +20,7 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
   String _query = '';
   FollowUpTab _activeTab = FollowUpTab.today;
   bool _loading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -30,15 +31,35 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
   Future<void> _loadLeads() async {
     setState(() {
       _loading = true;
+      _error = null;
     });
 
-    // Simulate loading delay
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      final response = await LeadService.getAllLeads();
 
-    setState(() {
-      _leads = LeadService.getLeads();
-      _loading = false;
-    });
+      if (response.success && response.data != null) {
+        // Convert API response to Lead models and filter for those with reminders
+        final leads = (response.data!.data as List)
+            .map((leadData) => Lead.fromJson(leadData))
+            .where((lead) => lead.reminderAt != null)
+            .toList();
+
+        setState(() {
+          _leads = leads;
+          _loading = false;
+        });
+      } else {
+        setState(() {
+          _error = response.message ?? 'Failed to load follow-ups';
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = 'Error loading follow-ups: $e';
+        _loading = false;
+      });
+    }
   }
 
   DateTime get _today {
@@ -279,6 +300,8 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
+                : _error != null
+                ? _buildErrorState()
                 : followUpData.isEmpty
                 ? _buildEmptyState()
                 : _buildFollowUpsList(followUpData),
@@ -315,6 +338,40 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
             fontWeight: FontWeight.w700,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 80, color: theme.colorScheme.error),
+          const SizedBox(height: 16),
+          Text(
+            'Error Loading Follow-ups',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _error ?? 'Something went wrong',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: _loadLeads,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }

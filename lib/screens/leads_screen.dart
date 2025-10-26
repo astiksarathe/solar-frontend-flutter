@@ -14,6 +14,7 @@ class LeadsScreen extends StatefulWidget {
 class _LeadsScreenState extends State<LeadsScreen> {
   List<Lead> _leads = [];
   bool _loading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -21,18 +22,33 @@ class _LeadsScreenState extends State<LeadsScreen> {
     _loadLeads();
   }
 
-  void _loadLeads() {
+  void _loadLeads() async {
     setState(() {
       _loading = true;
+      _error = null;
     });
 
-    // Simulate loading delay
-    Future.delayed(const Duration(milliseconds: 500), () {
+    try {
+      final result = await LeadService.getAllLeads(limit: 50);
+
+      if (result.success && result.data != null) {
+        final leadsData = result.data!.data;
+        setState(() {
+          _leads = leadsData.map((item) => Lead.fromJson(item)).toList();
+          _loading = false;
+        });
+      } else {
+        setState(() {
+          _error = result.message ?? 'Failed to load leads';
+          _loading = false;
+        });
+      }
+    } catch (e) {
       setState(() {
-        _leads = LeadService.getLeads();
+        _error = 'Network error: $e';
         _loading = false;
       });
-    });
+    }
   }
 
   void _navigateToAddLead() async {
@@ -69,12 +85,21 @@ class _LeadsScreenState extends State<LeadsScreen> {
     );
 
     if (confirmed == true && lead.id != null) {
-      final success = await LeadService.deleteLead(lead.id!);
-      if (success) {
+      final result = await LeadService.deleteLead(lead.id!);
+      if (result.success) {
         _loadLeads();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('${lead.name} deleted successfully')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result.message ?? 'Failed to delete lead'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -86,9 +111,47 @@ class _LeadsScreenState extends State<LeadsScreen> {
     return Scaffold(
       body: _loading
           ? const Center(child: CircularProgressIndicator())
+          : _error != null
+          ? _buildErrorState()
           : _leads.isEmpty
           ? _buildEmptyState()
           : _buildLeadsList(),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 80,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Error',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _error!,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _loadLeads,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -153,7 +216,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(LeadService.formatPhone(lead.phone)),
+                Text(lead.phone),
                 if (lead.divisionName != null)
                   Text(
                     lead.divisionName!,

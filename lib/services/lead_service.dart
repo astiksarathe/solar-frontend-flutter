@@ -1,167 +1,302 @@
-import '../models/lead_models.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'api_config.dart';
 
 class LeadService {
-  static final List<Lead> _leads = [];
-  static bool _initialized = false;
+  // Create lead
+  static Future<ApiResponse<Map<String, dynamic>>> createLead(
+    Map<String, dynamic> leadData,
+  ) async {
+    ApiConfig.logRequest('POST', '/leads', body: leadData);
 
-  // Initialize with sample data
-  static void _initializeSampleData() {
-    if (_initialized) return;
-
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final tomorrow = today.add(const Duration(days: 1));
-
-    // Add sample leads with reminders
-    _leads.addAll([
-      Lead(
-        id: 'sample_1',
-        name: 'Priya Sharma',
-        phone: '9876543210',
-        divisionName: 'Mumbai Central',
-        monthlyUnits: '250',
-        amount: '25000',
-        purpose: 'Residential',
-        reminderAt: today.add(const Duration(hours: 14)),
-        reminderType: 'callback',
-        reminderNote: 'Follow up on system sizing',
-        createdAt: now.subtract(const Duration(days: 5)),
-        status: 'active',
-      ),
-      Lead(
-        id: 'sample_2',
-        name: 'Rajesh Kumar',
-        phone: '9123456789',
-        divisionName: 'Delhi South',
-        monthlyUnits: '180',
-        amount: '18000',
-        purpose: 'Commercial',
-        reminderAt: tomorrow.add(const Duration(hours: 10)),
-        reminderType: 'meeting',
-        reminderNote: 'Site visit scheduled',
-        createdAt: now.subtract(const Duration(days: 3)),
-        status: 'active',
-      ),
-      Lead(
-        id: 'sample_3',
-        name: 'Anita Patel',
-        phone: '9555666777',
-        divisionName: 'Ahmedabad',
-        monthlyUnits: '320',
-        amount: '32000',
-        purpose: 'Residential',
-        reminderAt: today.add(const Duration(days: 3)),
-        reminderType: 'site_visit',
-        reminderNote: 'Roof inspection',
-        createdAt: now.subtract(const Duration(days: 1)),
-        status: 'active',
-      ),
-    ]);
-
-    _initialized = true;
-  }
-
-  // Get all leads
-  static List<Lead> getLeads() {
-    _initializeSampleData();
-    return List.from(_leads);
-  }
-
-  // Add a new lead
-  static Future<bool> addLead(Lead lead) async {
-    try {
-      // Simulate API delay
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      // Generate ID if not provided
-      final newLead = lead.copyWith(
-        id: lead.id ?? 'lead_${DateTime.now().millisecondsSinceEpoch}',
-        createdAt: DateTime.now(),
-        status: 'active',
+    return ApiUtils.handleRequest<Map<String, dynamic>>(() async {
+      final headers = await ApiConfig.authHeaders;
+      final response = await http.post(
+        ApiUtils.buildUri('/leads'),
+        headers: headers,
+        body: jsonEncode(leadData),
       );
-
-      _leads.add(newLead);
-      return true;
-    } catch (e) {
-      return false;
-    }
+      return response;
+    }, endpoint: 'create-lead');
   }
 
-  // Update an existing lead
-  static Future<bool> updateLead(Lead lead) async {
-    try {
-      await Future.delayed(const Duration(milliseconds: 300));
+  // Get all leads with filters and pagination
+  static Future<ApiResponse<PaginatedResponse<Map<String, dynamic>>>>
+  getAllLeads({
+    int page = 1,
+    int limit = 10,
+    String? status,
+    String? assignedTo,
+    String? leadSource,
+    String? interestLevel,
+    String? search,
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) async {
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'limit': limit,
+      if (status != null && status.isNotEmpty) 'status': status,
+      if (assignedTo != null && assignedTo.isNotEmpty) 'assignedTo': assignedTo,
+      if (leadSource != null && leadSource.isNotEmpty) 'leadSource': leadSource,
+      if (interestLevel != null && interestLevel.isNotEmpty)
+        'interestLevel': interestLevel,
+      if (search != null && search.isNotEmpty) 'search': search,
+      if (fromDate != null) 'fromDate': fromDate.toIso8601String(),
+      if (toDate != null) 'toDate': toDate.toIso8601String(),
+    };
 
-      final index = _leads.indexWhere((l) => l.id == lead.id);
-      if (index != -1) {
-        _leads[index] = lead;
-        return true;
-      }
-      return false;
-    } catch (e) {
-      return false;
-    }
-  }
+    ApiConfig.logRequest('GET', '/leads', body: queryParams);
 
-  // Delete a lead
-  static Future<bool> deleteLead(String id) async {
-    try {
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      final index = _leads.indexWhere((l) => l.id == id);
-      if (index != -1) {
-        _leads.removeAt(index);
-        return true;
-      }
-      return false;
-    } catch (e) {
-      return false;
-    }
+    return ApiUtils.handleRequest<PaginatedResponse<Map<String, dynamic>>>(
+      () async {
+        final headers = await ApiConfig.authHeaders;
+        final response = await http.get(
+          ApiUtils.buildUri('/leads', queryParameters: queryParams),
+          headers: headers,
+        );
+        return response;
+      },
+      fromJson: (data) => PaginatedResponse.fromJson(data, (item) => item),
+      endpoint: 'get-leads',
+    );
   }
 
   // Get lead by ID
-  static Lead? getLeadById(String id) {
-    try {
-      return _leads.firstWhere((lead) => lead.id == id);
-    } catch (e) {
-      return null;
-    }
+  static Future<ApiResponse<Map<String, dynamic>>> getLeadById(
+    String id,
+  ) async {
+    ApiConfig.logRequest('GET', '/leads/$id');
+
+    return ApiUtils.handleRequest<Map<String, dynamic>>(() async {
+      final headers = await ApiConfig.authHeaders;
+      final response = await http.get(
+        ApiUtils.buildUri('/leads/$id'),
+        headers: headers,
+      );
+      return response;
+    }, endpoint: 'get-lead-by-id');
   }
 
-  // Search leads by name or phone
-  static List<Lead> searchLeads(String query) {
-    if (query.isEmpty) return getLeads();
+  // Update lead
+  static Future<ApiResponse<Map<String, dynamic>>> updateLead(
+    String id,
+    Map<String, dynamic> leadData,
+  ) async {
+    ApiConfig.logRequest('PATCH', '/leads/$id', body: leadData);
 
-    final lowercaseQuery = query.toLowerCase();
-    return _leads.where((lead) {
-      return lead.name.toLowerCase().contains(lowercaseQuery) ||
-          lead.phone.contains(query) ||
-          (lead.divisionName?.toLowerCase().contains(lowercaseQuery) ?? false);
-    }).toList();
+    return ApiUtils.handleRequest<Map<String, dynamic>>(() async {
+      final headers = await ApiConfig.authHeaders;
+      final response = await http.patch(
+        ApiUtils.buildUri('/leads/$id'),
+        headers: headers,
+        body: jsonEncode(leadData),
+      );
+      return response;
+    }, endpoint: 'update-lead');
   }
 
-  // Validate phone number
+  // Delete lead
+  static Future<ApiResponse<Map<String, dynamic>>> deleteLead(String id) async {
+    ApiConfig.logRequest('DELETE', '/leads/$id');
+
+    return ApiUtils.handleRequest<Map<String, dynamic>>(() async {
+      final headers = await ApiConfig.authHeaders;
+      final response = await http.delete(
+        ApiUtils.buildUri('/leads/$id'),
+        headers: headers,
+      );
+      return response;
+    }, endpoint: 'delete-lead');
+  }
+
+  // Convert lead to customer
+  static Future<ApiResponse<Map<String, dynamic>>> convertLeadToCustomer(
+    String id,
+    Map<String, dynamic> conversionData,
+  ) async {
+    ApiConfig.logRequest('PATCH', '/leads/$id/convert', body: conversionData);
+
+    return ApiUtils.handleRequest<Map<String, dynamic>>(() async {
+      final headers = await ApiConfig.authHeaders;
+      final response = await http.patch(
+        ApiUtils.buildUri('/leads/$id/convert'),
+        headers: headers,
+        body: jsonEncode(conversionData),
+      );
+      return response;
+    }, endpoint: 'convert-lead');
+  }
+
+  // Get leads statistics
+  static Future<ApiResponse<Map<String, dynamic>>> getLeadsStats({
+    DateTime? fromDate,
+    DateTime? toDate,
+    String? assignedTo,
+  }) async {
+    final queryParams = <String, dynamic>{
+      if (fromDate != null) 'fromDate': fromDate.toIso8601String(),
+      if (toDate != null) 'toDate': toDate.toIso8601String(),
+      if (assignedTo != null && assignedTo.isNotEmpty) 'assignedTo': assignedTo,
+    };
+
+    ApiConfig.logRequest('GET', '/leads/stats', body: queryParams);
+
+    return ApiUtils.handleRequest<Map<String, dynamic>>(() async {
+      final headers = await ApiConfig.authHeaders;
+      final response = await http.get(
+        ApiUtils.buildUri('/leads/stats', queryParameters: queryParams),
+        headers: headers,
+      );
+      return response;
+    }, endpoint: 'get-leads-stats');
+  }
+
+  // Search leads
+  static Future<ApiResponse<List<Map<String, dynamic>>>> searchLeads(
+    String query,
+  ) async {
+    ApiConfig.logRequest('GET', '/leads/search', body: {'q': query});
+
+    return ApiUtils.handleRequest<List<Map<String, dynamic>>>(
+      () async {
+        final headers = await ApiConfig.authHeaders;
+        final response = await http.get(
+          ApiUtils.buildUri('/leads/search', queryParameters: {'q': query}),
+          headers: headers,
+        );
+        return response;
+      },
+      fromJson: (data) =>
+          (data['results'] as List?)
+              ?.map((item) => item as Map<String, dynamic>)
+              .toList() ??
+          [],
+      endpoint: 'search-leads',
+    );
+  }
+
+  // Assign lead to user
+  static Future<ApiResponse<Map<String, dynamic>>> assignLead(
+    String id,
+    String assignedTo, {
+    String? notes,
+  }) async {
+    final data = {'assignedTo': assignedTo, if (notes != null) 'notes': notes};
+
+    ApiConfig.logRequest('PATCH', '/leads/$id/assign', body: data);
+
+    return ApiUtils.handleRequest<Map<String, dynamic>>(() async {
+      final headers = await ApiConfig.authHeaders;
+      final response = await http.patch(
+        ApiUtils.buildUri('/leads/$id/assign'),
+        headers: headers,
+        body: jsonEncode(data),
+      );
+      return response;
+    }, endpoint: 'assign-lead');
+  }
+
+  // Update lead status
+  static Future<ApiResponse<Map<String, dynamic>>> updateLeadStatus(
+    String id,
+    String status, {
+    String? notes,
+  }) async {
+    final data = {'status': status, if (notes != null) 'notes': notes};
+
+    ApiConfig.logRequest('PATCH', '/leads/$id/status', body: data);
+
+    return ApiUtils.handleRequest<Map<String, dynamic>>(() async {
+      final headers = await ApiConfig.authHeaders;
+      final response = await http.patch(
+        ApiUtils.buildUri('/leads/$id/status'),
+        headers: headers,
+        body: jsonEncode(data),
+      );
+      return response;
+    }, endpoint: 'update-lead-status');
+  }
+
+  // Get leads by status
+  static Future<ApiResponse<List<Map<String, dynamic>>>> getLeadsByStatus(
+    String status,
+  ) async {
+    ApiConfig.logRequest('GET', '/leads/status/$status');
+
+    return ApiUtils.handleRequest<List<Map<String, dynamic>>>(
+      () async {
+        final headers = await ApiConfig.authHeaders;
+        final response = await http.get(
+          ApiUtils.buildUri('/leads/status/$status'),
+          headers: headers,
+        );
+        return response;
+      },
+      fromJson: (data) =>
+          (data['leads'] as List?)
+              ?.map((item) => item as Map<String, dynamic>)
+              .toList() ??
+          [],
+      endpoint: 'get-leads-by-status',
+    );
+  }
+
+  // Get my leads (assigned to current user)
+  static Future<ApiResponse<List<Map<String, dynamic>>>> getMyLeads() async {
+    ApiConfig.logRequest('GET', '/leads/my');
+
+    return ApiUtils.handleRequest<List<Map<String, dynamic>>>(
+      () async {
+        final headers = await ApiConfig.authHeaders;
+        final response = await http.get(
+          ApiUtils.buildUri('/leads/my'),
+          headers: headers,
+        );
+        return response;
+      },
+      fromJson: (data) =>
+          (data['leads'] as List?)
+              ?.map((item) => item as Map<String, dynamic>)
+              .toList() ??
+          [],
+      endpoint: 'get-my-leads',
+    );
+  }
+
+  // Bulk import leads
+  static Future<ApiResponse<Map<String, dynamic>>> bulkImportLeads(
+    List<Map<String, dynamic>> leadsData,
+  ) async {
+    ApiConfig.logRequest(
+      'POST',
+      '/leads/bulk-import',
+      body: {'leads': leadsData},
+    );
+
+    return ApiUtils.handleRequest<Map<String, dynamic>>(() async {
+      final headers = await ApiConfig.authHeaders;
+      final response = await http.post(
+        ApiUtils.buildUri('/leads/bulk-import'),
+        headers: headers,
+        body: jsonEncode({'leads': leadsData}),
+      );
+      return response;
+    }, endpoint: 'bulk-import-leads');
+  }
+
+  // Validate phone number (utility method)
   static bool validatePhone(String phone) {
     final digits = phone.replaceAll(RegExp(r'\D'), '');
     return digits.length >= 10 && digits.length <= 15;
   }
 
-  // Format phone number for display
+  // Format phone number for display (utility method)
   static String formatPhone(String phone) {
     final digits = phone.replaceAll(RegExp(r'\D'), '');
     if (digits.length == 10) {
       return '${digits.substring(0, 3)}-${digits.substring(3, 6)}-${digits.substring(6)}';
     }
     return phone;
-  }
-
-  // Get leads count
-  static int getLeadsCount() {
-    return _leads.length;
-  }
-
-  // Clear all leads (for testing)
-  static void clearLeads() {
-    _leads.clear();
   }
 }

@@ -42,10 +42,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       );
 
       if (mounted) {
-        if (result['success']) {
+        if (result.success) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['message']),
+              content: Text(result.message ?? 'Password reset successful'),
               backgroundColor: Colors.green,
             ),
           );
@@ -56,7 +56,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['message']),
+              content: Text(result.message ?? 'Password reset failed'),
               backgroundColor: Colors.red,
             ),
           );

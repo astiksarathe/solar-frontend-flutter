@@ -11,9 +11,13 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _phoneController = TextEditingController();
   bool _showPassword = false;
   bool _showConfirmPassword = false;
   bool _isLoading = false;
@@ -21,9 +25,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   void dispose() {
+    _usernameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -48,15 +56,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     try {
       final result = await AuthService.register(
+        username: _usernameController.text.trim(),
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
+        phoneNumber: _phoneController.text.trim(),
       );
 
       if (mounted) {
-        if (result['success']) {
+        if (result.success) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['message']),
+              content: Text(result.message ?? 'Account created successfully!'),
               backgroundColor: Colors.green,
             ),
           );
@@ -67,7 +79,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['message']),
+              content: Text(result.message ?? 'Registration failed'),
               backgroundColor: Colors.red,
             ),
           );
@@ -233,6 +245,202 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
+                                  // Username field
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Username',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: isDarkMode
+                                                  ? colorScheme.onSurface
+                                                  : Colors.white,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextFormField(
+                                        controller: _usernameController,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Username is required';
+                                          }
+                                          if (value.length < 3) {
+                                            return 'Username must be at least 3 characters';
+                                          }
+                                          return null;
+                                        },
+                                        textInputAction: TextInputAction.next,
+                                        style: TextStyle(
+                                          color: isDarkMode
+                                              ? colorScheme.onSurface
+                                              : Colors.white,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: 'Enter username',
+                                          hintStyle: TextStyle(
+                                            color: isDarkMode
+                                                ? colorScheme.onSurface
+                                                      .withOpacity(0.5)
+                                                : Colors.white.withOpacity(0.5),
+                                          ),
+                                          filled: true,
+                                          fillColor: isDarkMode
+                                              ? Colors.white.withOpacity(0.02)
+                                              : const Color(0xFF0f2a35),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 16,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  // Name fields row
+                                  Row(
+                                    children: [
+                                      // First Name field
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'First Name',
+                                              style: theme.textTheme.bodyMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: isDarkMode
+                                                        ? colorScheme.onSurface
+                                                        : Colors.white,
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            TextFormField(
+                                              controller: _firstNameController,
+                                              validator: (value) {
+                                                if (value == null ||
+                                                    value.isEmpty) {
+                                                  return 'First name is required';
+                                                }
+                                                return null;
+                                              },
+                                              textInputAction:
+                                                  TextInputAction.next,
+                                              style: TextStyle(
+                                                color: isDarkMode
+                                                    ? colorScheme.onSurface
+                                                    : Colors.white,
+                                              ),
+                                              decoration: InputDecoration(
+                                                hintText: 'First name',
+                                                hintStyle: TextStyle(
+                                                  color: isDarkMode
+                                                      ? colorScheme.onSurface
+                                                            .withOpacity(0.5)
+                                                      : Colors.white
+                                                            .withOpacity(0.5),
+                                                ),
+                                                filled: true,
+                                                fillColor: isDarkMode
+                                                    ? Colors.white.withOpacity(
+                                                        0.02,
+                                                      )
+                                                    : const Color(0xFF0f2a35),
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  borderSide: BorderSide.none,
+                                                ),
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 16,
+                                                    ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+
+                                      // Last Name field
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Last Name',
+                                              style: theme.textTheme.bodyMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: isDarkMode
+                                                        ? colorScheme.onSurface
+                                                        : Colors.white,
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            TextFormField(
+                                              controller: _lastNameController,
+                                              validator: (value) {
+                                                if (value == null ||
+                                                    value.isEmpty) {
+                                                  return 'Last name is required';
+                                                }
+                                                return null;
+                                              },
+                                              textInputAction:
+                                                  TextInputAction.next,
+                                              style: TextStyle(
+                                                color: isDarkMode
+                                                    ? colorScheme.onSurface
+                                                    : Colors.white,
+                                              ),
+                                              decoration: InputDecoration(
+                                                hintText: 'Last name',
+                                                hintStyle: TextStyle(
+                                                  color: isDarkMode
+                                                      ? colorScheme.onSurface
+                                                            .withOpacity(0.5)
+                                                      : Colors.white
+                                                            .withOpacity(0.5),
+                                                ),
+                                                filled: true,
+                                                fillColor: isDarkMode
+                                                    ? Colors.white.withOpacity(
+                                                        0.02,
+                                                      )
+                                                    : const Color(0xFF0f2a35),
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  borderSide: BorderSide.none,
+                                                ),
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 16,
+                                                    ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
                                   // Email field
                                   Column(
                                     crossAxisAlignment:
@@ -262,6 +470,60 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ),
                                         decoration: InputDecoration(
                                           hintText: 'Enter your email',
+                                          hintStyle: TextStyle(
+                                            color: isDarkMode
+                                                ? colorScheme.onSurface
+                                                      .withOpacity(0.5)
+                                                : Colors.white.withOpacity(0.5),
+                                          ),
+                                          filled: true,
+                                          fillColor: isDarkMode
+                                              ? Colors.white.withOpacity(0.02)
+                                              : const Color(0xFF0f2a35),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 16,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  // Phone number field
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Phone Number (Optional)',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: isDarkMode
+                                                  ? colorScheme.onSurface
+                                                  : Colors.white,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextFormField(
+                                        controller: _phoneController,
+                                        keyboardType: TextInputType.phone,
+                                        textInputAction: TextInputAction.next,
+                                        style: TextStyle(
+                                          color: isDarkMode
+                                              ? colorScheme.onSurface
+                                              : Colors.white,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: 'Enter phone number',
                                           hintStyle: TextStyle(
                                             color: isDarkMode
                                                 ? colorScheme.onSurface

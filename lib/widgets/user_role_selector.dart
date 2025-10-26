@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/order_models.dart';
-import '../services/order_service.dart';
 
 class UserRoleSelector extends StatefulWidget {
   const UserRoleSelector({super.key});
@@ -10,7 +9,8 @@ class UserRoleSelector extends StatefulWidget {
 }
 
 class _UserRoleSelectorState extends State<UserRoleSelector> {
-  UserRole _currentRole = OrderService.currentUserRole;
+  UserRole _currentRole = UserRole
+      .salesPerson; // Default role since API doesn't provide current role
 
   String _getRoleDisplayName(UserRole role) {
     switch (role) {
@@ -139,7 +139,12 @@ class _UserRoleSelectorState extends State<UserRoleSelector> {
                         setState(() {
                           _currentRole = role;
                         });
-                        OrderService.setUserRole(role);
+                        // TODO: Implement role setting when API supports it
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Role switching feature coming soon'),
+                          ),
+                        );
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -175,17 +180,17 @@ class _UserRoleSelectorState extends State<UserRoleSelector> {
 
                     _buildAccessItem(
                       'View All Orders',
-                      OrderService.canViewAllOrders(),
+                      true, // TODO: Implement when API supports permissions
                       theme,
                     ),
                     _buildAccessItem(
                       'Edit Order Stages',
-                      OrderService.canEditOrders(),
+                      false, // TODO: Implement when API supports permissions
                       theme,
                     ),
                     _buildAccessItem(
                       'View Cost Breakdown',
-                      OrderService.canViewCostBreakdown(),
+                      true, // TODO: Implement when API supports permissions
                       theme,
                     ),
                   ],

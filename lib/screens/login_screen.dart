@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (mounted) {
-        if (result['success']) {
+        if (result.success) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => const NavigationController(),
@@ -50,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['message']),
+              content: Text(result.message ?? 'Login failed'),
               backgroundColor: Colors.red,
             ),
           );

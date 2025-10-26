@@ -14,6 +14,7 @@ class OrderDetailScreen extends StatefulWidget {
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   SolarOrder? _order;
   bool _loading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -24,14 +25,33 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Future<void> _loadOrder() async {
     setState(() {
       _loading = true;
+      _error = null;
     });
 
-    await Future.delayed(const Duration(milliseconds: 300));
+    try {
+      final response = await OrderService.getOrderById(widget.orderId);
 
-    setState(() {
-      _order = OrderService.getOrderById(widget.orderId);
-      _loading = false;
-    });
+      if (response.success && response.data != null) {
+        // Convert API response to SolarOrder model
+        final orderData = response.data!['order'];
+        final order = SolarOrder.fromJson(orderData);
+
+        setState(() {
+          _order = order;
+          _loading = false;
+        });
+      } else {
+        setState(() {
+          _error = response.message ?? 'Failed to load order details';
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = 'Error loading order: $e';
+        _loading = false;
+      });
+    }
   }
 
   Color _getStatusColor(OrderStatus status) {
@@ -55,46 +75,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     }
   }
 
-  Future<void> _updateStage(OrderStage stage, bool completed) async {
-    if (!OrderService.canEditOrders()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You do not have permission to update order stages'),
-        ),
-      );
-      return;
-    }
-
-    final updatedStage = stage.copyWith(
-      isCompleted: completed,
-      completedAt: completed ? DateTime.now() : null,
-      completedBy: completed ? 'Current User' : null,
-    );
-
-    final success = await OrderService.updateOrderStage(
-      widget.orderId,
-      stage.id,
-      updatedStage,
-    );
-
-    if (success) {
-      _loadOrder();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            completed
-                ? 'Stage "${stage.name}" marked as completed'
-                : 'Stage "${stage.name}" marked as incomplete',
-          ),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to update stage')));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -102,6 +82,40 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (_error != null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 80, color: colorScheme.error),
+              const SizedBox(height: 16),
+              Text(
+                'Error Loading Order',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _error!,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface.withOpacity(0.5),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _loadOrder,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     if (_order == null) {
@@ -172,10 +186,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
             const SizedBox(height: 16),
 
-            // Cost Breakdown Card (only for authorized users)
-            if (OrderService.canViewCostBreakdown() &&
-                _order!.costBreakdown != null)
-              _buildCostCard(theme),
+            // Cost Breakdown Card
+            if (_order!.costBreakdown != null) _buildCostCard(theme),
           ],
         ),
       ),
@@ -437,13 +449,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ),
                     ),
 
-                    // Toggle button for authorized users
-                    if (OrderService.canEditOrders())
-                      Switch(
-                        value: isCompleted,
-                        onChanged: (value) => _updateStage(stage, value),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
+                    // Toggle button temporarily disabled until permission system is implemented
                   ],
                 ),
 

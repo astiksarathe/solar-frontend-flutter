@@ -144,14 +144,14 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
         reminderType: _selectedReminderType,
       );
 
-      final success = await LeadService.addLead(newLead);
+      final success = await LeadService.createLead(newLead.toJson());
 
-      if (success) {
+      if (success.success) {
         _showSuccessDialog();
       } else {
         _showValidationDialog(
           'Error',
-          'Failed to save lead. Please try again.',
+          success.message ?? 'Failed to save lead. Please try again.',
         );
       }
     } catch (e) {

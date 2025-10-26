@@ -64,10 +64,40 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
     });
 
     try {
-      final leads = LeadService.getLeads();
-      final foundLead = leads.firstWhere(
-        (lead) => lead.id == widget.leadId,
-        orElse: () => Lead(
+      final response = await LeadService.getLeadById(widget.leadId);
+
+      if (response.success && response.data != null) {
+        // Convert API response to Lead model
+        final leadData = response.data!['lead'];
+        final lead = Lead.fromJson(leadData);
+
+        setState(() {
+          _lead = lead;
+          _loading = false;
+        });
+      } else {
+        // If API fails, try to create a default lead for demo
+        setState(() {
+          _lead = Lead(
+            id: widget.leadId,
+            name: 'Sample Lead',
+            phone: '9876543210',
+            divisionName: 'Mumbai Division',
+            monthlyUnits: '150',
+            amount: '15000',
+            purpose: 'Residential',
+            avgUnits: '145',
+            reminderAt: DateTime.now().add(const Duration(days: 3)),
+            reminderType: 'callback',
+            reminderNote: 'Follow up on system sizing requirements',
+          );
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      // On error, create a default lead for demo
+      setState(() {
+        _lead = Lead(
           id: widget.leadId,
           name: 'Sample Lead',
           phone: '9876543210',
@@ -79,15 +109,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
           reminderAt: DateTime.now().add(const Duration(days: 3)),
           reminderType: 'callback',
           reminderNote: 'Follow up on system sizing requirements',
-        ),
-      );
-
-      setState(() {
-        _lead = foundLead;
-        _loading = false;
-      });
-    } catch (e) {
-      setState(() {
+        );
         _loading = false;
       });
     }
