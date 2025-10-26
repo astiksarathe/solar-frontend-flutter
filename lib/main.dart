@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
+import 'services/navigation_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,6 +30,7 @@ class _MyAppState extends State<MyApp> {
       toggleTheme: _toggleTheme,
       child: MaterialApp(
         title: 'Solar Phoenix',
+        navigatorKey: NavigationService.navigatorKey,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,

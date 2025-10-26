@@ -28,7 +28,15 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
     _loadConsumerData();
   }
 
+  @override
+  void dispose() {
+    // Cancel any ongoing operations or timers here if needed
+    super.dispose();
+  }
+
   Future<void> _loadConsumerData() async {
+    if (!mounted) return;
+
     setState(() {
       _loading = true;
       _error = null;
@@ -40,6 +48,8 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
         sortBy: 'avgUnits',
         sortOrder: 'desc',
       );
+
+      if (!mounted) return;
 
       if (response.success && response.data != null) {
         setState(() {
@@ -60,6 +70,8 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
         }
       }
     } catch (e) {
+      if (!mounted) return;
+
       // Handle network errors gracefully
       if (e.toString().contains('Connection refused') ||
           e.toString().contains('SocketException') ||
@@ -75,6 +87,8 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
   }
 
   void _loadDemoData() {
+    if (!mounted) return;
+
     // Provide demo data when API is unavailable
     setState(() {
       _consumerData = [
@@ -416,9 +430,11 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
                 custom.SearchBar(
                   value: _query,
                   onChanged: (value) {
-                    setState(() {
-                      _query = value;
-                    });
+                    if (mounted) {
+                      setState(() {
+                        _query = value;
+                      });
+                    }
                   },
                   placeholder: 'Search name, mobile, address, or division',
                 ),
@@ -444,9 +460,11 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
             child: FloatingActionButton.extended(
               heroTag: "directory_filter_fab",
               onPressed: () {
-                setState(() {
-                  _modalOpen = true;
-                });
+                if (mounted) {
+                  setState(() {
+                    _modalOpen = true;
+                  });
+                }
               },
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -462,15 +480,19 @@ class _DirectoryScreenState extends State<DirectoryScreen> {
           SortFilterModal(
             visible: _modalOpen,
             onClose: () {
-              setState(() {
-                _modalOpen = false;
-              });
+              if (mounted) {
+                setState(() {
+                  _modalOpen = false;
+                });
+              }
             },
             onApply: (sort, filter) {
-              setState(() {
-                _sort = sort;
-                _filter = filter;
-              });
+              if (mounted) {
+                setState(() {
+                  _sort = sort;
+                  _filter = filter;
+                });
+              }
             },
             initialSort: _sort,
             initialFilter: _filter,

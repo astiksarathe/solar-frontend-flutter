@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
 import 'auth_service.dart';
+import 'navigation_service.dart';
 
 class ApiConfig {
   static const String baseUrl = 'http://localhost:3000';
@@ -198,6 +199,15 @@ class ApiUtils {
       final response = await request().timeout(ApiConfig.requestTimeout);
       ApiConfig.logResponse(response, endpoint: endpoint);
 
+      // Handle 401 Unauthorized responses
+      if (response.statusCode == 401) {
+        await handleUnauthorized();
+        return ApiResponse<T>.error(
+          'Session expired. Please login again.',
+          statusCode: 401,
+        );
+      }
+
       return ApiResponse<T>.fromResponse(response, fromJson: fromJson);
     } catch (e) {
       ApiConfig.logError(e, endpoint: endpoint);
@@ -211,6 +221,25 @@ class ApiUtils {
       } else {
         return ApiResponse<T>.error('An error occurred: $e');
       }
+    }
+  }
+
+  /// Handle unauthorized responses - clear auth data and redirect to login
+  static Future<void> handleUnauthorized() async {
+    try {
+      // Clear authentication data
+      await AuthService.clearAuthData();
+
+      // Show message to user
+      NavigationService.showSnackBar(
+        'Your session has expired. Please login again.',
+        isError: true,
+      );
+
+      // Navigate to login screen
+      await NavigationService.navigateToLogin();
+    } catch (e) {
+      ApiConfig.logError('Error handling unauthorized response: $e');
     }
   }
 

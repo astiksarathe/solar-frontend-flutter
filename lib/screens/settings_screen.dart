@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../main.dart';
+import '../services/auth_test_util.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -237,6 +239,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             const SizedBox(height: 24),
 
+            // Debug Section (only in debug mode)
+            if (kDebugMode) ...[
+              _buildSettingsSection(context, 'Debug', Icons.bug_report, [
+                _buildSettingsTile(
+                  'Test Unauthorized',
+                  'Simulate 401 unauthorized response',
+                  Icons.security,
+                  () => _testUnauthorizedResponse(),
+                ),
+                _buildSettingsTile(
+                  'Validate Session',
+                  'Check if current session is valid',
+                  Icons.verified_user,
+                  () => _validateCurrentSession(),
+                ),
+                _buildSettingsTile(
+                  'Force Logout',
+                  'Force logout and clear session',
+                  Icons.logout,
+                  () => _forceLogout(),
+                ),
+              ]),
+              const SizedBox(height: 24),
+            ],
+
             // Danger Zone
             Card(
               color: colorScheme.errorContainer.withOpacity(0.3),
@@ -354,6 +381,62 @@ class _SettingsScreenState extends State<SettingsScreen> {
         onChanged: onChanged,
       ),
     );
+  }
+
+  // Debug methods (only available in debug mode)
+  Future<void> _testUnauthorizedResponse() async {
+    try {
+      await AuthTestUtil.simulateUnauthorizedResponse();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error testing unauthorized response: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _validateCurrentSession() async {
+    try {
+      final isValid = await AuthTestUtil.validateSession();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isValid ? 'Session is valid ✅' : 'Session is invalid ❌',
+            ),
+            backgroundColor: isValid ? Colors.green : Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error validating session: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _forceLogout() async {
+    try {
+      await AuthTestUtil.forceLogout(reason: 'Debug force logout');
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error forcing logout: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _showComingSoon(BuildContext context, String feature) {
